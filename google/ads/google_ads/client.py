@@ -1,4 +1,4 @@
-# Copyright 2018 Google LLC
+# Copyright 2020 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,88 +13,92 @@
 # limitations under the License.
 """A client and common configurations for the Google Ads API."""
 
-import logging
-import os
-import yaml
+from importlib import import_module
+import logging.config
 
-import google.api_core.grpc_helpers
-import google.auth.transport.requests
-import google.oauth2.credentials
-import google.ads.google_ads.errors
-from google.ads.google_ads.v0.proto.errors import errors_pb2
 import grpc
+
+from google.ads.google_ads import config, oauth2, util
+from google.ads.google_ads.interceptors import MetadataInterceptor, \
+    ExceptionInterceptor, LoggingInterceptor
 
 
 _logger = logging.getLogger(__name__)
 
-_REQUIRED_KEYS = ('client_id', 'client_secret', 'refresh_token',
-                  'developer_token')
-_SERVICE_CLIENT_TEMPLATE = '%sClient'
-_SERVICE_GRPC_TRANSPORT_TEMPLATE = '%sGrpcTransport'
-_PROTO_TEMPLATE = '%s_pb2'
-_DEFAULT_TOKEN_URI = 'https://accounts.google.com/o/oauth2/token'
-_DEFAULT_VERSION = 'v0'
+_SERVICE_CLIENT_TEMPLATE = '{}Client'
+_SERVICE_GRPC_TRANSPORT_TEMPLATE = '{}GrpcTransport'
+
+_VALID_API_VERSIONS = ['v3', 'v2', 'v1']
+_DEFAULT_VERSION = _VALID_API_VERSIONS[0]
+
+_GRPC_CHANNEL_OPTIONS = [
+    ('grpc.max_metadata_size', 16 * 1024 * 1024),
+    ('grpc.max_receive_message_length', 64 * 1024 * 1024)]
+
+
+unary_stream_single_threading_option = util.get_nested_attr(
+    grpc, 'experimental.ChannelOptions.SingleThreadedUnaryStream', None)
+
+if unary_stream_single_threading_option:
+    _GRPC_CHANNEL_OPTIONS.append(
+        (unary_stream_single_threading_option, 1))
 
 
 class GoogleAdsClient(object):
     """Google Ads client used to configure settings and fetch services."""
 
     @classmethod
-    def _get_client_kwargs_from_yaml(cls, yaml_str):
-        """Utility function used to load client kwargs from YAML string.
+    def _get_client_kwargs(cls, config_data):
+        """Converts configuration dict into kwargs required by the client.
 
         Args:
-            yaml_str: a str containing client configuration in YAML format.
+            config_data: a dict containing client configuration.
 
         Returns:
-            A dict containing configuration data that will be provided to the
-            GoogleAdsClient initializer as keyword arguments.
+            A dict containing kwargs that will be provided to the
+            GoogleAdsClient initializer.
 
         Raises:
             ValueError: If the configuration lacks a required field.
         """
-        config_data = yaml.safe_load(yaml_str) or {}
-
-        if all(required_key in config_data for required_key in _REQUIRED_KEYS):
-            credentials = google.oauth2.credentials.Credentials(
-                None,
-                refresh_token=config_data['refresh_token'],
-                client_id=config_data['client_id'],
-                client_secret=config_data['client_secret'],
-                token_uri=_DEFAULT_TOKEN_URI)
-            credentials.refresh(google.auth.transport.requests.Request())
-
-            return {'credentials': credentials,
-                    'developer_token': config_data['developer_token']}
-        else:
-            raise ValueError('A required field in the configuration data was'
-                             'not found. The required fields are: %s'
-                             % str(_REQUIRED_KEYS))
+        return {'credentials': oauth2.get_credentials(config_data),
+                'developer_token': config_data.get('developer_token'),
+                'endpoint': config_data.get('endpoint'),
+                'login_customer_id': config_data.get('login_customer_id'),
+                'logging_config': config_data.get('logging')}
 
     @classmethod
-    def get_type(cls, name, version=_DEFAULT_VERSION):
-        """Returns the specified common, enum, error, or resource type.
+    def _get_api_services_by_version(cls, version):
+        """Returns a module with all services and types for a given API version.
 
         Args:
-            name: a str indicating the name of the type that is being retrieved;
-                e.g. you may specify "CampaignOperation" to retrieve a
-                CampaignOperation instance.
-            version: a str indicating the version of the Google Ads API to be
-                used.
+            version: a str indicating the API version.
 
         Returns:
-            A Message instance representing the desired type.
-
-        Raises:
-            AttributeError: If the type for the specified name doesn't exist
-                in the given version.
+            A module containing all services and types for the a API version.
         """
         try:
-            message_type = getattr(_get_version(version).types, name)
-        except AttributeError:
-            raise ValueError('Specified type "%s" does not exist in Google Ads '
-                             'API %s.' % (name, version))
-        return message_type()
+            version_module = import_module(f'google.ads.google_ads.{version}')
+        except ImportError:
+            raise ValueError('Specified Google Ads API version "{}" does not '
+                             'exist. Valid API versions are: "{}"'.format(
+                                 version, '", "'.join(_VALID_API_VERSIONS)))
+        return version_module
+
+    @classmethod
+    def load_from_env(cls):
+        """Creates a GoogleAdsClient with data stored in the env variables.
+
+        Returns:
+            A GoogleAdsClient initialized with the values specified in the
+            env variables.
+
+        Raises:
+            ValueError: If the configuration lacks a required field.
+        """
+        config_data = config.load_from_env()
+        kwargs = cls._get_client_kwargs(config_data)
+        return cls(**kwargs)
 
     @classmethod
     def load_from_string(cls, yaml_str):
@@ -111,7 +115,28 @@ class GoogleAdsClient(object):
         Raises:
             ValueError: If the configuration lacks a required field.
         """
-        return cls(**cls._get_client_kwargs_from_yaml(yaml_str))
+        config_data = config.parse_yaml_document_to_dict(yaml_str)
+        kwargs = cls._get_client_kwargs(config_data)
+        return cls(**kwargs)
+
+    @classmethod
+    def load_from_dict(cls, config_dict):
+        """Creates a GoogleAdsClient with data stored in the config_dict.
+
+        Args:
+            config_dict: a dict consisting of configuration data used to
+                initialize a GoogleAdsClient.
+
+        Returns:
+            A GoogleAdsClient initialized with the values specified in the
+                dict.
+
+        Raises:
+            ValueError: If the configuration lacks a required field.
+        """
+        config_data = config.load_from_dict(config_dict)
+        kwargs = cls._get_client_kwargs(config_data)
+        return cls(**kwargs)
 
     @classmethod
     def load_from_storage(cls, path=None):
@@ -130,28 +155,59 @@ class GoogleAdsClient(object):
             IOError: If the configuration file can't be loaded.
             ValueError: If the configuration file lacks a required field.
         """
-        if path is None:
-            path = os.path.join(os.path.expanduser('~'), 'google-ads.yaml')
+        config_data = config.load_from_yaml_file(path)
+        kwargs = cls._get_client_kwargs(config_data)
+        return cls(**kwargs)
 
-        if not os.path.isabs(path):
-            path = os.path.expanduser(path)
+    @classmethod
+    def get_type(cls, name, version=_DEFAULT_VERSION):
+        """Returns the specified common, enum, error, or resource type.
 
-        with open(path, 'rb') as handle:
-            yaml_str = handle.read()
+        Args:
+            name: a str indicating the name of the type that is being retrieved;
+                e.g. you may specify "CampaignOperation" to retrieve a
+                CampaignOperation instance.
+            version: a str indicating the the Google Ads API version to be used.
 
-        return cls.load_from_string(yaml_str)
+        Returns:
+            A Message instance representing the desired type.
 
-    def __init__(self, credentials, developer_token):
+        Raises:
+            AttributeError: If the type for the specified name doesn't exist
+                in the given version.
+        """
+        if name.lower().endswith('pb2'):
+            raise ValueError(f'Specified type "{name}" must be a class,'
+                             f' not a module')
+
+        try:
+            type_classes = cls._get_api_services_by_version(version).types
+            message_class = getattr(type_classes, name)
+        except AttributeError:
+            raise ValueError(f'Specified type "{name}" does not exist in '
+                             f'Google Ads API {version}')
+        return message_class()
+
+    def __init__(self, credentials, developer_token, endpoint=None,
+                 login_customer_id=None, logging_config=None):
         """Initializer for the GoogleAdsClient.
 
         Args:
             credentials: a google.oauth2.credentials.Credentials instance.
             developer_token: a str developer token.
+            endpoint: a str specifying an optional alternative API endpoint.
+            login_customer_id: a str specifying a login customer ID.
+            logging_config: a dict specifying logging config options.
         """
+        if logging_config:
+            logging.config.dictConfig(logging_config)
+
         self.credentials = credentials
         self.developer_token = developer_token
+        self.endpoint = endpoint
+        self.login_customer_id = login_customer_id
 
-    def get_service(self, name, version=_DEFAULT_VERSION):
+    def get_service(self, name, version=_DEFAULT_VERSION, interceptors=None):
         """Returns a service client instance for the specified service_name.
 
         Args:
@@ -160,6 +216,9 @@ class GoogleAdsClient(object):
                 "CampaignService" to retrieve a CampaignServiceClient instance.
             version: a str indicating the version of the Google Ads API to be
                 used.
+            interceptors: an optional list of interceptors to include in
+                requests. NOTE: this parameter is not intended for non-Google
+                use and is not officially supported.
 
         Returns:
             A service client instance associated with the given service_name.
@@ -167,167 +226,40 @@ class GoogleAdsClient(object):
         Raises:
             AttributeError: If the specified name doesn't exist.
         """
-        version = _get_version(version)
+        api_module = self._get_api_services_by_version(version)
+        interceptors = interceptors or []
 
         try:
-            service_client = getattr(version, _SERVICE_CLIENT_TEMPLATE % name)
+            service_client = getattr(api_module,
+                                     _SERVICE_CLIENT_TEMPLATE.format(name))
         except AttributeError:
-            raise ValueError('Specified service "%s" does not exist in Google '
-                             'Ads API %s.' % (name, version))
+            raise ValueError('Specified service {}" does not exist in Google '
+                             'Ads API {}.'.format(name, version))
 
         try:
             service_transport_class = getattr(
-                version, _SERVICE_GRPC_TRANSPORT_TEMPLATE % name)
+                api_module, _SERVICE_GRPC_TRANSPORT_TEMPLATE.format(name))
         except AttributeError:
             raise ValueError('Grpc transport does not exist for the specified '
-                             'service "%s".' % name)
+                             'service "{}".'.format(name))
+
+        endpoint = (self.endpoint if self.endpoint
+                    else service_client.SERVICE_ADDRESS)
 
         channel = service_transport_class.create_channel(
-            credentials=self.credentials)
+            address=endpoint,
+            credentials=self.credentials,
+            options=_GRPC_CHANNEL_OPTIONS)
+
+        interceptors = interceptors + [
+            MetadataInterceptor(self.developer_token, self.login_customer_id),
+            LoggingInterceptor(_logger, version, endpoint),
+            ExceptionInterceptor(version)]
 
         channel = grpc.intercept_channel(
             channel,
-            MetadataInterceptor(self.developer_token),
-            ExceptionInterceptor(),
-        )
+            *interceptors)
 
         service_transport = service_transport_class(channel=channel)
 
         return service_client(transport=service_transport)
-
-
-class ExceptionInterceptor(grpc.UnaryUnaryClientInterceptor):
-    """An interceptor that wraps rpc exceptions."""
-
-    _FAILURE_KEY = 'google.ads.googleads.v0.errors.googleadsfailure-bin'
-    _REQUEST_ID_KEY = 'request-id'
-    # Codes that are retried upon by google.api_core.
-    _RETRY_STATUS_CODES = (
-        grpc.StatusCode.INTERNAL, grpc.StatusCode.RESOURCE_EXHAUSTED)
-
-    def _get_google_ads_failure(self, trailing_metadata):
-        """Gets the Google Ads failure details if they exist.
-
-        Args:
-            trailing_metadata:
-
-        Returns:
-            A GoogleAdsFailure that describes how a GoogleAds API call failed.
-            Returns None if either the trailing metadata of the request did not
-            return the failure details, or if the GoogleAdsFailure fails to
-            parse.
-        """
-        for kv in trailing_metadata:
-            if kv[0] == self._FAILURE_KEY:
-                try:
-                    ga_failure = errors_pb2.GoogleAdsFailure()
-                    ga_failure.ParseFromString(kv[1])
-                    return ga_failure
-                except google.protobuf.message.DecodeError:
-                    return None
-
-    def _get_request_id(self, trailing_metadata):
-        """Gets the request ID for the Google Ads API request.
-
-        Args:
-            trailing_metadata:
-
-        Returns:
-            A str request ID associated with the Google Ads API request, or None
-            if it doesn't exist.
-        """
-        for kv in trailing_metadata:
-            if kv[0] == self._REQUEST_ID_KEY:
-                return kv[1]  # Return the found request ID.
-
-        return None
-
-
-
-    def intercept_unary_unary(self, continuation, client_call_details, request):
-        """Intercepts and wraps exceptions in the rpc response.
-
-        Overrides abstract method defined in grpc.UnaryUnaryClientInterceptor.
-
-        Raises:
-            GoogleAdsException: if the Google Ads API response contains an
-                exception and GoogleAdsFailure is in the trailing metadata.
-        """
-        response = continuation(client_call_details, request)
-        ex = response.exception()
-
-        if ex and response._state.code not in self._RETRY_STATUS_CODES:
-            trailing_metadata = response.trailing_metadata()
-            google_ads_failure = self._get_google_ads_failure(trailing_metadata)
-
-            if google_ads_failure:
-                request_id = self._get_request_id(trailing_metadata)
-
-                raise google.ads.google_ads.errors.GoogleAdsException(
-                    ex, response, google_ads_failure, request_id)
-            else:
-                # Raise the original exception if not a GoogleAdsFailure.
-                raise ex
-
-        return response
-
-
-class LoggingInterceptor(grpc.UnaryUnaryClientInterceptor):
-    """An interceptor that logs rpc requests and responses."""
-
-    def intercept_unary_unary(self, continuation, client_call_details, request):
-        """Intercepts and logs API interactions.
-
-        Overrides abstract method defined in grpc.UnaryUnaryClientInterceptor.
-        """
-        _logger.debug('Method: "%s" called with Request: "%s"'
-                      % (client_call_details.method, request))
-
-        response = continuation(client_call_details, request)
-
-        # TODO: Handle response here.
-
-        return response
-
-
-class MetadataInterceptor(grpc.UnaryUnaryClientInterceptor):
-    """An interceptor that appends custom metadata to requests."""
-
-    def __init__(self, developer_token):
-        self.developer_token_meta = ('developer-token', developer_token)
-
-    def intercept_unary_unary(self, continuation, client_call_details, request):
-        """Intercepts and appends custom metadata.
-
-        Overrides abstract method defined in grpc.UnaryUnaryClientInterceptor.
-        """
-        if client_call_details.metadata is None:
-            metadata = []
-        else:
-            metadata = list(client_call_details.metadata)
-
-        metadata.append(self.developer_token_meta)
-
-        client_call_details = grpc._interceptor._ClientCallDetails(
-            client_call_details.method, client_call_details.timeout, metadata,
-            client_call_details.credentials
-        )
-
-        return continuation(client_call_details, request)
-
-
-def _get_version(name):
-    """Returns the given API version.
-
-    Args:
-        name: a str indicating the API version.
-
-    Returns:
-        A module associated with the given API version.
-    """
-    try:
-        version = getattr(google.ads.google_ads, name)
-    except AttributeError:
-        raise ValueError('Specified Google Ads API version "%s" does not exist.'
-                         % name)
-    return version
