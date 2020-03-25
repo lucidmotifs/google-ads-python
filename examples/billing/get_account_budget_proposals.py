@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,12 +17,10 @@
 To add an account budget proposal, run add_account_budget_proposal.py
 """
 
-from __future__ import absolute_import
 
 import argparse
 import sys
 
-import six
 
 import google.ads.google_ads.client
 
@@ -30,7 +29,7 @@ _DEFAULT_PAGE_SIZE = 1000
 
 
 def main(client, customer_id, page_size):
-    ga_service = client.get_service('GoogleAdsService', version='v1')
+    ga_service = client.get_service('GoogleAdsService', version='v3')
 
     query = ('SELECT account_budget_proposal.id, '
              'account_budget_proposal.account_budget,'
@@ -91,7 +90,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Lists all account budget proposals.')
     # The following argument(s) should be provided to run the example.
-    parser.add_argument('-c', '--customer_id', type=six.text_type,
+    parser.add_argument('-c', '--customer_id', type=str,
                         required=True, help='The Google Ads customer ID.')
     args = parser.parse_args()
 

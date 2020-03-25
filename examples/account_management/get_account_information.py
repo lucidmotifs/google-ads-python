@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,17 +17,15 @@
 For example, its name, currency, time zone, etc.
 """
 
-from __future__ import absolute_import
 
 import argparse
-import six
 import sys
 
 import google.ads.google_ads.client
 
 
 def main(client, customer_id):
-    customer_service = client.get_service('CustomerService', version='v1')
+    customer_service = client.get_service('CustomerService', version='v3')
 
     resource_name = customer_service.customer_path(customer_id)
 
@@ -60,7 +59,7 @@ if __name__ == '__main__':
         description=('Displays basic information about the specified '
                      'customer\'s advertising account.'))
     # The following argument(s) should be provided to run the example.
-    parser.add_argument('-c', '--customer_id', type=six.text_type,
+    parser.add_argument('-c', '--customer_id', type=str,
                         required=True, help='The Google Ads customer ID.')
     args = parser.parse_args()
 

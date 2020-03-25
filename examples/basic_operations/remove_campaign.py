@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,18 +14,16 @@
 # limitations under the License.
 """This example removes an existing campaign."""
 
-from __future__ import absolute_import
 
 import argparse
-import six
 import sys
 
 import google.ads.google_ads.client
 
 
 def main(client, customer_id, campaign_id):
-    campaign_service = client.get_service('CampaignService', version='v1')
-    campaign_operation = client.get_type('CampaignOperation', version='v1')
+    campaign_service = client.get_service('CampaignService', version='v3')
+    campaign_operation = client.get_type('CampaignOperation', version='v3')
 
     resource_name = campaign_service.campaign_path(customer_id, campaign_id)
     campaign_operation.remove = resource_name
@@ -54,9 +53,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description=('Removes given campaign for the specified customer.'))
     # The following argument(s) should be provided to run the example.
-    parser.add_argument('-c', '--customer_id', type=six.text_type,
+    parser.add_argument('-c', '--customer_id', type=str,
                         required=True, help='The Google Ads customer ID.')
-    parser.add_argument('-i', '--campaign_id', type=six.text_type,
+    parser.add_argument('-i', '--campaign_id', type=str,
                         required=True, help='The campaign ID.')
     args = parser.parse_args()
 

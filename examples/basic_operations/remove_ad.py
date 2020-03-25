@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,21 +14,19 @@
 # limitations under the License.
 """This example removes an existing ad."""
 
-from __future__ import absolute_import
 
 import argparse
-import six
 import sys
 
-import google.ads.google_ads.client
-
+from google.ads.google_ads.client import GoogleAdsClient
+from google.ads.google_ads.util import ResourceName
 
 def main(client, customer_id, ad_group_id, ad_id):
-    ad_group_ad_service = client.get_service('AdGroupAdService', version='v1')
-    ad_group_ad_operation = client.get_type('AdGroupAdOperation', version='v1')
+    ad_group_ad_service = client.get_service('AdGroupAdService', version='v3')
+    ad_group_ad_operation = client.get_type('AdGroupAdOperation', version='v3')
 
     resource_name = ad_group_ad_service.ad_group_ad_path(
-        customer_id, '%s_%s' % (ad_group_id, ad_id))
+        customer_id, ResourceName.format_composite(ad_group_id, ad_id))
     ad_group_ad_operation.remove = resource_name
 
     try:
@@ -50,17 +49,15 @@ def main(client, customer_id, ad_group_id, ad_id):
 if __name__ == '__main__':
     # GoogleAdsClient will read the google-ads.yaml configuration file in the
     # home directory if none is specified.
-    google_ads_client = (google.ads.google_ads.client.GoogleAdsClient
-                         .load_from_storage())
-
+    google_ads_client = GoogleAdsClient.load_from_storage()
     parser = argparse.ArgumentParser(
         description=('Removes an ad from the specified customer\'s ad group.'))
     # The following argument(s) should be provided to run the example.
-    parser.add_argument('-c', '--customer_id', type=six.text_type,
+    parser.add_argument('-c', '--customer_id', type=str,
                         required=True, help='The Google Ads customer ID.')
-    parser.add_argument('-a', '--ad_group_id', type=six.text_type,
+    parser.add_argument('-a', '--ad_group_id', type=str,
                         required=True, help='The ad group ID.')
-    parser.add_argument('-i', '--ad_id', type=six.text_type, required=True,
+    parser.add_argument('-i', '--ad_id', type=str, required=True,
                         help='The ad ID.')
     args = parser.parse_args()
 

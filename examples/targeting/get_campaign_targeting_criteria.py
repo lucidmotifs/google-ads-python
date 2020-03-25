@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,10 +15,8 @@
 """This example illustrates how to get campaign criteria, or negative keywords.
 """
 
-from __future__ import absolute_import
 
 import argparse
-import six
 import sys
 
 import google.ads.google_ads.client
@@ -27,7 +26,7 @@ _DEFAULT_PAGE_SIZE = 1000
 
 
 def main(client, customer_id, campaign_id, page_size):
-    ga_service = client.get_service('GoogleAdsService', version='v1')
+    ga_service = client.get_service('GoogleAdsService', version='v3')
 
     query = ('SELECT campaign.id, campaign_criterion.campaign, '
              'campaign_criterion.criterion_id, campaign_criterion.negative, '
@@ -45,7 +44,7 @@ def main(client, customer_id, campaign_id, page_size):
                   % criterion.criterion_id.value)
 
             if criterion.type == client.get_type('CriterionTypeEnum',
-                                                 version='v1').KEYWORD:
+                                                 version='v3').KEYWORD:
                 print('\t%sKeyword with text "%s" and match type %s.'
                       % ('' if criterion.negative.value else 'Negative',
                          criterion.keyword.text.value,
@@ -73,9 +72,9 @@ if __name__ == '__main__':
         description=('List campaign criteria, or negative keywords, for a '
                      'given campaign.'))
     # The following argument(s) should be provided to run the example.
-    parser.add_argument('-c', '--customer_id', type=six.text_type,
+    parser.add_argument('-c', '--customer_id', type=str,
                         required=True, help='The Google Ads customer ID.')
-    parser.add_argument('-i', '--campaign_id', type=six.text_type,
+    parser.add_argument('-i', '--campaign_id', type=str,
                         required=True, help='The campaign ID.')
     args = parser.parse_args()
 

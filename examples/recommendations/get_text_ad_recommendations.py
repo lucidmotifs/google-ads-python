@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,10 +17,8 @@
 To add campaigns, run add_campaigns.py.
 """
 
-from __future__ import absolute_import
 
 import argparse
-import six
 import sys
 
 import google.ads.google_ads.client
@@ -29,7 +28,7 @@ _DEFAULT_PAGE_SIZE = 1000
 
 
 def main(client, customer_id, page_size):
-    ga_service = client.get_service('GoogleAdsService', version='v1')
+    ga_service = client.get_service('GoogleAdsService', version='v3')
 
     query = ('SELECT recommendation.type, recommendation.campaign, '
              'recommendation.text_ad_recommendation FROM recommendation '
@@ -72,7 +71,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Lists TEXT_AD recommendations for specified customer.')
     # The following argument(s) should be provided to run the example.
-    parser.add_argument('-c', '--customer_id', type=six.text_type,
+    parser.add_argument('-c', '--customer_id', type=str,
                         required=True, help='The Google Ads customer ID.')
     args = parser.parse_args()
 

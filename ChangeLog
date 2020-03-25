@@ -1,3 +1,91 @@
+* 5.0.2
+- Remove response error caching in streaming interceptors.
+
+* 5.0.1
+- Defer loading of error_pb2 until failed response is encountered.
+
+* 5.0.0
+- Google Ads v3_0 release
+
+* 4.1.1:
+- Fix for types.py to include classes of dependent modules
+
+* 4.1.0:
+- Performance improvements
+- Updated dependencies for more recent versions
+- Bumped Python version to 3.7+
+
+* 4.0.0:
+- Removing support for Python 2
+
+* 3.3.0:
+- Google ads v2_2 release
+
+* 3.2.0:
+- Google ads v2_1 release
+- Fix formatting typo in README
+- Add AdWords -> Google Ads migration examples
+
+* 3.1.2:
+-  Update signature for customer_service.create_customer_client method to
+   give default values to optional parameters.
+
+* 3.1.1:
+- Refactor GoogleAdsClient to isolate interceptors into individual modules
+- Update partial failure example so it can be parsed for documentation
+- Add get_campaigns_by_label example
+- Add set_ad_parameters example
+
+* 3.1.0:
+- Add load_from_dict method to the GoogleAdsClient
+- Update add_expanded_text_ads example to add multiple ads
+- Add build status badge to README
+
+* 3.0.0:
+- Google Ads v2_0 release
+
+* 2.4.1:
+- Fix bug preventing login_customer_id to be loaded as an int
+
+* 2.4.0:
+- Add utf-8 encoding declaration in generated proto files
+- Add Service Account support
+- Increase default gRPC message and metadata sizes
+
+* 2.3.0:
+- Allow loading client configuration from environment variables
+
+* 2.2.0:
+- Update service-level timeout and idempotency configurations
+- Add link_manager_to_client example
+- Add add_dsa_campaign example
+- Add dynamic page feed example
+- Add add_gmail_ad example
+- Add create_campaign_experiment example
+- Add wiki link to README
+
+* 2.1.0:
+- Google Ads v1_3 release
+
+* 2.0.0:
+- Google Ads v1_2 release
+- Update example file names
+- Remove support for v0
+
+* 1.3.1:
+- Add new planning examples add_keyword_plan and generate_forecast_metrics
+- Add new example generate_keyword_ideas
+- Update README to link to the Google Ads API Support page
+
+* 1.3.0:
+- Update payment_mode enum with fields for v1_1
+- Update PyYAML dependency to latest stable version
+- Add utility for formatting composite resource names
+
+* 1.2.0:
+- Google Ads v1_1 release
+- Add add_sitelink example
+
 * 1.1.1:
 - Fix bidding source proto adding missing fields from API v1.
 

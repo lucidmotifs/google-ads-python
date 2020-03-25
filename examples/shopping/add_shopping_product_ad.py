@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,10 +24,8 @@ https://support.google.com/merchants/answer/188924.
 This account must be linked to your Google Ads account.
 """
 
-from __future__ import absolute_import
 
 import argparse
-import six
 import sys
 import uuid
 
@@ -61,11 +60,11 @@ def main(client, customer_id, merchant_center_account_id,
 def add_campaign_budget(client, customer_id):
     """Creates a new campaign budget in the specified client account."""
     campaign_budget_service = client.get_service('CampaignBudgetService',
-                                                 version='v1')
+                                                 version='v3')
 
     # Create a budget, which can be shared by multiple campaigns.
     campaign_budget_operation = client.get_type('CampaignBudgetOperation',
-                                                version='v1')
+                                                version='v3')
     campaign_budget = campaign_budget_operation.create
     campaign_budget.name.value = 'Interplanetary Budget %s' % uuid.uuid4()
     campaign_budget.delivery_method = client.get_type(
@@ -97,14 +96,14 @@ def add_campaign_budget(client, customer_id):
 def add_shopping_product_ad_group_ad(client, customer_id,
                                      ad_group_resource_name):
     """Creates a new shopping product ad group ad in the specified ad group."""
-    ad_group_ad_service = client.get_service('AdGroupAdService', version='v1')
+    ad_group_ad_service = client.get_service('AdGroupAdService', version='v3')
 
     # Creates a new ad group ad and sets the product ad to it.
-    ad_group_ad_operation = client.get_type('AdGroupAdOperation', version='v1')
+    ad_group_ad_operation = client.get_type('AdGroupAdOperation', version='v3')
     ad_group_ad = ad_group_ad_operation.create
     ad_group_ad.ad_group.value = ad_group_resource_name
     ad_group_ad.status = client.get_type('AdGroupAdStatusEnum',
-                                         version='v1').PAUSED
+                                         version='v3').PAUSED
     ad_group_ad.ad.shopping_product_ad.CopyFrom(client.get_type(
         'ShoppingProductAdInfo'))
 
@@ -125,25 +124,25 @@ def add_shopping_product_ad_group_ad(client, customer_id,
     ad_group_ad_resource_name = ad_group_ad_response.results[0].resource_name
 
     print('Created shopping product ad group ad %s.' %
-          ad_group_ad_resource_nam)
+          ad_group_ad_resource_name)
 
     return ad_group_resource_name
 
 
 def add_shopping_product_ad_group(client, customer_id, campaign_resource_name):
     """Creates a new shopping product ad group in the specified campaign."""
-    ad_group_service = client.get_service('AdGroupService', version='v1')
+    ad_group_service = client.get_service('AdGroupService', version='v3')
 
     # Create ad group.
-    ad_group_operation = client.get_type('AdGroupOperation', version='v1')
+    ad_group_operation = client.get_type('AdGroupOperation', version='v3')
     ad_group = ad_group_operation.create
     ad_group.name.value = 'Earth to Mars cruise %s' % uuid.uuid4()
-    ad_group.status = client.get_type('AdGroupStatusEnum', version='v1').ENABLED
+    ad_group.status = client.get_type('AdGroupStatusEnum', version='v3').ENABLED
     ad_group.campaign.value = campaign_resource_name
     # Sets the ad group type to SHOPPING_PRODUCT_ADS. This is the only value
     # possible for ad groups that contain shopping product ads.
     ad_group.type = client.get_type('AdGroupTypeEnum',
-                                    version='v1').SHOPPING_PRODUCT_ADS
+                                    version='v3').SHOPPING_PRODUCT_ADS
     ad_group.cpc_bid_micros.value = 10000000
 
     # Add the ad group.
@@ -172,10 +171,10 @@ def add_standard_shopping_campaign(client, customer_id, budget_resource_name,
                                    merchant_center_account_id):
     """Creates a new standard shopping campaign in the specified client account.
     """
-    campaign_service = client.get_service('CampaignService', version='v1')
+    campaign_service = client.get_service('CampaignService', version='v3')
 
     # Create standard shoppping campaign.
-    campaign_operation = client.get_type('CampaignOperation', version='v1')
+    campaign_operation = client.get_type('CampaignOperation', version='v3')
     campaign = campaign_operation.create
     campaign.name.value = 'Interplanetary Cruise Campaign %s' % uuid.uuid4()
 
@@ -199,7 +198,7 @@ def add_standard_shopping_campaign(client, customer_id, budget_resource_name,
     # Recommendation: Set the campaign to PAUSED when creating it to prevent the
     # ads from immediately serving. Set to ENABLED once you've added targeting
     # and the ads are ready to serve.
-    campaign.status = client.get_type('CampaignStatusEnum', version='v1').PAUSED
+    campaign.status = client.get_type('CampaignStatusEnum', version='v3').PAUSED
 
     # Sets the bidding strategy to Manual CPC (with eCPC enabled)
     # Recommendation: Use one of the automated bidding strategies for Shopping
@@ -242,12 +241,12 @@ def add_default_shopping_listing_group(client, customer_id,
     the bid for a given listing group.
     """
     ad_group_criterion_service = client.get_service('AdGroupCriterionService',
-                                                    version='v1')
+                                                    version='v3')
 
     # Creates a new ad group criterion. This will contain the "default" listing
     # group (All products).
     ad_group_criterion_operation = client.get_type('AdGroupCriterionOperation',
-                                                   version='v1')
+                                                   version='v3')
     ad_group_criterion = ad_group_criterion_operation.create
     ad_group_criterion.ad_group.value = ad_group_resource_name
     ad_group_criterion.status = client.get_type(
@@ -287,7 +286,7 @@ if __name__ == '__main__':
                      'group and a shopping product ad to the specified '
                      'merchant account.'))
     # The following argument(s) should be provided to run the example.
-    parser.add_argument('-c', '--customer_id', type=six.text_type,
+    parser.add_argument('-c', '--customer_id', type=str,
                         required=True, help='The Google Ads customer ID.')
     parser.add_argument('-m', '--merchant_center_account_id', type=int,
                         required=True, help='The merchant center account ID.')

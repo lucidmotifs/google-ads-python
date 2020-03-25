@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,10 +17,8 @@
 To get ad groups, run get_ad_groups.py.
 """
 
-from __future__ import absolute_import
 
 import argparse
-import six
 import sys
 import uuid
 
@@ -27,18 +26,18 @@ import google.ads.google_ads.client
 
 
 def main(client, customer_id, campaign_id):
-    ad_group_service = client.get_service('AdGroupService', version='v1')
-    campaign_service = client.get_service('CampaignService', version='v1')
+    ad_group_service = client.get_service('AdGroupService', version='v3')
+    campaign_service = client.get_service('CampaignService', version='v3')
 
     # Create ad group.
-    ad_group_operation = client.get_type('AdGroupOperation', version='v1')
+    ad_group_operation = client.get_type('AdGroupOperation', version='v3')
     ad_group = ad_group_operation.create
     ad_group.name.value = 'Earth to Mars cruises %s' % uuid.uuid4()
-    ad_group.status = client.get_type('AdGroupStatusEnum', version='v1').ENABLED
+    ad_group.status = client.get_type('AdGroupStatusEnum', version='v3').ENABLED
     ad_group.campaign.value = campaign_service.campaign_path(
         customer_id, campaign_id)
     ad_group.type = client.get_type('AdGroupTypeEnum',
-                                    version='v1').SEARCH_STANDARD
+                                    version='v3').SEARCH_STANDARD
     ad_group.cpc_bid_micros.value = 10000000
 
     # Add the ad group.
@@ -67,9 +66,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Adds an ad group for specified customer and campaign id.')
     # The following argument(s) should be provided to run the example.
-    parser.add_argument('-c', '--customer_id', type=six.text_type,
+    parser.add_argument('-c', '--customer_id', type=str,
                         required=True, help='The Google Ads customer ID.')
-    parser.add_argument('-i', '--campaign_id', type=six.text_type,
+    parser.add_argument('-i', '--campaign_id', type=str,
                         required=True, help='The campaign ID.')
     args = parser.parse_args()
 

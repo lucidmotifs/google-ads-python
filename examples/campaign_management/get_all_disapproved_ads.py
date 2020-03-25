@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +14,8 @@
 # limitations under the License.
 """This illustrates how to retrieve disapproved ads in a given campaign."""
 
-from __future__ import absolute_import
 
 import argparse
-import six
 import sys
 import google.ads.google_ads.client
 
@@ -25,7 +24,7 @@ _DEFAULT_PAGE_SIZE = 1000
 
 
 def main(client, customer_id, campaign_id, page_size):
-    ga_service = client.get_service('GoogleAdsService', version='v1')
+    ga_service = client.get_service('GoogleAdsService', version='v3')
 
     query = ('SELECT ad_group_ad.ad.id, ad_group_ad.ad.type, '
              'ad_group_ad.policy_summary FROM ad_group_ad '
@@ -35,7 +34,7 @@ def main(client, customer_id, campaign_id, page_size):
 
     try:
         disapproved_ads_count = 0
-        ad_type_enum = client.get_type('AdTypeEnum', version='v1').AdType
+        ad_type_enum = client.get_type('AdTypeEnum', version='v3').AdType
         policy_topic_entry_type_enum = client.get_type(
             'PolicyTopicEntryTypeEnum').PolicyTopicEntryType
 
@@ -91,9 +90,9 @@ if __name__ == '__main__':
         description=('Lists disapproved ads for a given customer\'s specified '
                      'campaign.'))
     # The following argument(s) should be provided to run the example.
-    parser.add_argument('-c', '--customer_id', type=six.text_type,
+    parser.add_argument('-c', '--customer_id', type=str,
                         required=True, help='The Google Ads customer ID.')
-    parser.add_argument('-i', '--campaign_id', type=six.text_type,
+    parser.add_argument('-i', '--campaign_id', type=str,
                         required=True, help='The campaign ID.')
     args = parser.parse_args()
 

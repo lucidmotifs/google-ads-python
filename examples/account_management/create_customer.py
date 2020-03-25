@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,10 +20,8 @@ account. By default, the new account will only be accessible via the manager
 account.
 """
 
-from __future__ import absolute_import
 
 import argparse
-import six
 import sys
 from datetime import datetime
 
@@ -30,8 +29,8 @@ import google.ads.google_ads.client
 
 
 def main(client, manager_customer_id):
-    customer_service = client.get_service('CustomerService', version='v1')
-    customer = client.get_type('Customer', version='v1')
+    customer_service = client.get_service('CustomerService', version='v3')
+    customer = client.get_type('Customer', version='v3')
     today = datetime.today().strftime('%Y%m%d %H:%M:%S')
     customer.descriptive_name.value = ('Account created with '
                                        'CustomerService on %s' % today)
@@ -72,7 +71,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description=('Creates a new client under the given manager.'))
     # The following argument(s) should be provided to run the example.
-    parser.add_argument('-m', '--manager_customer_id', type=six.text_type,
+    parser.add_argument('-m', '--manager_customer_id', type=str,
                         required=True, help='A Google Ads customer ID for the '
                         'manager account under which the new customer will '
                         'be created.')

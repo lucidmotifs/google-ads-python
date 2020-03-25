@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,10 +17,8 @@
 To get campaigns, run get_campaigns.py.
 """
 
-from __future__ import absolute_import
 
 import argparse
-import six
 import sys
 
 import google.ads.google_ads.errors
@@ -28,13 +27,13 @@ from google.api_core import protobuf_helpers
 
 
 def main(client, customer_id, campaign_id):
-    campaign_service = client.get_service('CampaignService', version='v1')
+    campaign_service = client.get_service('CampaignService', version='v3')
     # Create campaign operation.
-    campaign_operation = client.get_type('CampaignOperation', version='v1')
+    campaign_operation = client.get_type('CampaignOperation', version='v3')
     campaign = campaign_operation.update
     campaign.resource_name = campaign_service.campaign_path(
         customer_id, campaign_id)
-    campaign.status = client.get_type('CampaignStatusEnum', version='v1').PAUSED
+    campaign.status = client.get_type('CampaignStatusEnum', version='v3').PAUSED
     campaign.network_settings.target_search_network.value = False
     # Retrieve a FieldMask for the fields configured in the campaign.
     fm = protobuf_helpers.field_mask(None, campaign)
@@ -66,9 +65,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Updates the given campaign for the specified customer.')
     # The following argument(s) should be provided to run the example.
-    parser.add_argument('-c', '--customer_id', type=six.text_type,
+    parser.add_argument('-c', '--customer_id', type=str,
                         required=True, help='The Google Ads customer ID.')
-    parser.add_argument('-i', '--campaign_id', type=six.text_type,
+    parser.add_argument('-i', '--campaign_id', type=str,
                         required=True, help='The campaign ID.')
     args = parser.parse_args()
 

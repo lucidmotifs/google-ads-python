@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +14,8 @@
 # limitations under the License.
 """This example illustrates adding a conversion action."""
 
-from __future__ import absolute_import
 
 import argparse
-import six
 import sys
 import uuid
 
@@ -25,11 +24,11 @@ import google.ads.google_ads.client
 
 def main(client, customer_id):
     conversion_action_service = client.get_service('ConversionActionService',
-                                                   version='v1')
+                                                   version='v3')
 
     # Create the operation.
     conversion_action_operation = client.get_type('ConversionActionOperation',
-                                                  version='v1')
+                                                  version='v3')
 
     # Create conversion action.
     conversion_action = conversion_action_operation.create
@@ -76,7 +75,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Adds a conversion action for specified customer.')
     # The following argument(s) should be provided to run the example.
-    parser.add_argument('-c', '--customer_id', type=six.text_type,
+    parser.add_argument('-c', '--customer_id', type=str,
                         required=True, help='The Google Ads customer ID.')
     args = parser.parse_args()
 

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +14,8 @@
 # limitations under the License.
 """This example adds campaign targeting criteria."""
 
-from __future__ import absolute_import
 
 import argparse
-import six
 import sys
 
 import google.ads.google_ads.client
@@ -24,7 +23,7 @@ import google.ads.google_ads.client
 
 def main(client, customer_id, campaign_id, keyword, location_id):
     campaign_criterion_service = client.get_service('CampaignCriterionService',
-                                                    version='v1')
+                                                    version='v3')
 
     operations = [
         create_location_op(client, customer_id, campaign_id, location_id),
@@ -51,13 +50,13 @@ def main(client, customer_id, campaign_id, keyword, location_id):
 
 
 def create_location_op(client, customer_id, campaign_id, location_id):
-    campaign_service = client.get_service('CampaignService', version='v1')
+    campaign_service = client.get_service('CampaignService', version='v3')
     geo_target_constant_service = client.get_service('GeoTargetConstantService',
-                                                     version='v1')
+                                                     version='v3')
 
     # Create the campaign criterion.
     campaign_criterion_operation = client.get_type('CampaignCriterionOperation',
-                                                   version='v1')
+                                                   version='v3')
     campaign_criterion = campaign_criterion_operation.create
     campaign_criterion.campaign.value = campaign_service.campaign_path(
         customer_id, campaign_id)
@@ -73,11 +72,11 @@ def create_location_op(client, customer_id, campaign_id, location_id):
 
 
 def create_negative_keyword_op(client, customer_id, campaign_id, keyword):
-    campaign_service = client.get_service('CampaignService', version='v1')
+    campaign_service = client.get_service('CampaignService', version='v3')
 
     # Create the campaign criterion.
     campaign_criterion_operation = client.get_type('CampaignCriterionOperation',
-                                                   version='v1')
+                                                   version='v3')
     campaign_criterion = campaign_criterion_operation.create
     campaign_criterion.campaign.value = campaign_service.campaign_path(
         customer_id, campaign_id)
@@ -85,17 +84,17 @@ def create_negative_keyword_op(client, customer_id, campaign_id, keyword):
     criterion_keyword = campaign_criterion.keyword
     criterion_keyword.text.value = keyword
     criterion_keyword.match_type = client.get_type('KeywordMatchTypeEnum',
-                                                   version='v1').BROAD
+                                                   version='v3').BROAD
 
     return campaign_criterion_operation
 
 
 def create_proximity_op(client, customer_id, campaign_id):
-    campaign_service = client.get_service('CampaignService', version='v1')
+    campaign_service = client.get_service('CampaignService', version='v3')
 
     # Create the campaign criterion.
     campaign_criterion_operation = client.get_type('CampaignCriterionOperation',
-                                                   version='v1')
+                                                   version='v3')
     campaign_criterion = campaign_criterion_operation.create
     campaign_criterion.campaign.value = campaign_service.campaign_path(
         customer_id, campaign_id)
@@ -122,14 +121,14 @@ if __name__ == '__main__':
         description=('Adds campaign targeting criteria for the specified '
                      'campaign under the given customer ID.'))
     # The following argument(s) should be provided to run the example.
-    parser.add_argument('-c', '--customer_id', type=six.text_type,
+    parser.add_argument('-c', '--customer_id', type=str,
                         required=True, help='The Google Ads customer ID.')
-    parser.add_argument('-i', '--campaign_id', type=six.text_type,
+    parser.add_argument('-i', '--campaign_id', type=str,
                         required=True, help='The campaign ID.')
-    parser.add_argument('-k', '--keyword', type=six.text_type, required=True,
+    parser.add_argument('-k', '--keyword', type=str, required=True,
                         help='The keyword to be added to the campaign.')
     parser.add_argument(
-        '-l', '--location_id', type=six.text_type, required=False,
+        '-l', '--location_id', type=str, required=False,
         default='21167',  # New York
         help=('A location criterion ID, this field is optional. If not '
               'specified, will default to New York. For more information on '

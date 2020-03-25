@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,10 +20,8 @@ be found at:
 https://support.google.com/hotelprices/answer/6101897.
 """
 
-from __future__ import absolute_import
 
 import argparse
-import six
 import sys
 import uuid
 
@@ -31,29 +30,29 @@ import google.ads.google_ads.client
 
 def main(client, customer_id, hotel_center_account_id,
          bid_ceiling_micro_amount):
-    # Add budget
+
     budget_resource_name = add_budget(client, customer_id)
 
-    # Add hotel campaign
+
     campaign_resource_name = add_hotel_campaign(
         client, customer_id, budget_resource_name, hotel_center_account_id,
         bid_ceiling_micro_amount)
 
-    # Add hotel ad group
+
     ad_group_resource_name = add_hotel_ad_group(client, customer_id,
                                                 campaign_resource_name)
 
-    # Add hotel ad
+
     add_hotel_ad(client, customer_id, ad_group_resource_name)
 
 
 def add_budget(client, customer_id):
     campaign_budget_service = client.get_service('CampaignBudgetService',
-                                                 version='v1')
+                                                 version='v3')
 
     # Create a budget, which can be shared by multiple campaigns.
     campaign_budget_operation = client.get_type('CampaignBudgetOperation',
-                                                version='v1')
+                                                version='v3')
     campaign_budget = campaign_budget_operation.create
     campaign_budget.name.value = 'Interplanetary Budget %s' % uuid.uuid4()
     campaign_budget.delivery_method = client.get_type(
@@ -83,16 +82,19 @@ def add_budget(client, customer_id):
 
 
 def add_hotel_ad(client, customer_id, ad_group_resource_name):
-    ad_group_ad_service = client.get_service('AdGroupAdService', version='v1')
+    ad_group_ad_service = client.get_service('AdGroupAdService', version='v3')
 
     # Creates a new ad group ad and sets the hotel ad to it.
-    ad_group_ad_operation = client.get_type('AdGroupAdOperation', version='v1')
+    ad_group_ad_operation = client.get_type('AdGroupAdOperation', version='v3')
     ad_group_ad = ad_group_ad_operation.create
     ad_group_ad.ad_group.value = ad_group_resource_name
+    # Set the ad group ad to enabled.  Setting this to paused will cause an error
+    # for hotel campaigns.  For hotels pausing should happen at either the ad group or
+    # campaign level.
     ad_group_ad.status = client.get_type('AdGroupAdStatusEnum',
-                                         version='v1').PAUSED
+                                         version='v3').ENABLED
     ad_group_ad.ad.hotel_ad.CopyFrom(client.get_type('HotelAdInfo',
-                                                     version='v1'))
+                                                     version='v3'))
 
     # Add the ad group ad.
     try:
@@ -116,16 +118,16 @@ def add_hotel_ad(client, customer_id, ad_group_resource_name):
 
 
 def add_hotel_ad_group(client, customer_id, campaign_resource_name):
-    ad_group_service = client.get_service('AdGroupService', version='v1')
+    ad_group_service = client.get_service('AdGroupService', version='v3')
 
     # Create ad group.
-    ad_group_operation = client.get_type('AdGroupOperation', version='v1')
+    ad_group_operation = client.get_type('AdGroupOperation', version='v3')
     ad_group = ad_group_operation.create
     ad_group.name.value = 'Earth to Mars cruise %s' % uuid.uuid4()
-    ad_group.status = client.get_type('AdGroupStatusEnum', version='v1').ENABLED
+    ad_group.status = client.get_type('AdGroupStatusEnum', version='v3').ENABLED
     ad_group.campaign.value = campaign_resource_name
     # Sets the ad group type to HOTEL_ADS. This cannot be set to other types.
-    ad_group.type = client.get_type('AdGroupTypeEnum', version='v1').HOTEL_ADS
+    ad_group.type = client.get_type('AdGroupTypeEnum', version='v3').HOTEL_ADS
     ad_group.cpc_bid_micros.value = 10000000
 
     # Add the ad group.
@@ -152,10 +154,10 @@ def add_hotel_ad_group(client, customer_id, campaign_resource_name):
 
 def add_hotel_campaign(client, customer_id, budget_resource_name,
                        hotel_center_account_id, bid_ceiling_micro_amount):
-    campaign_service = client.get_service('CampaignService', version='v1')
+    campaign_service = client.get_service('CampaignService', version='v3')
 
     # Create campaign.
-    campaign_operation = client.get_type('CampaignOperation', version='v1')
+    campaign_operation = client.get_type('CampaignOperation', version='v3')
     campaign = campaign_operation.create
     campaign.name.value = 'Interplanetary Cruise Campaign %s' % uuid.uuid4()
 
@@ -168,7 +170,7 @@ def add_hotel_campaign(client, customer_id, budget_resource_name,
     # Recommendation: Set the campaign to PAUSED when creating it to prevent the
     # ads from immediately serving. Set to ENABLED once you've added targeting
     # and the ads are ready to serve.
-    campaign.status = client.get_type('CampaignStatusEnum', version='v1').PAUSED
+    campaign.status = client.get_type('CampaignStatusEnum', version='v3').PAUSED
 
     # Set the bidding strategy to PercentCpc. Only Manual CPC and Percent CPC
     # can be used for hotel campaigns.
@@ -214,12 +216,12 @@ if __name__ == '__main__':
         description=('Adds an expanded text ad to the specified ad group ID, '
                      'for the given customer ID.'))
     # The following argument(s) should be provided to run the example.
-    parser.add_argument('-c', '--customer_id', type=six.text_type,
+    parser.add_argument('-c', '--customer_id', type=str,
                         required=True, help='The Google Ads customer ID.')
     parser.add_argument('-b', '--bid_ceiling_micro_amount', type=int,
                         required=True, help=('The bid ceiling micro amount for '
                                              'the hotel campaign.'))
-    parser.add_argument('-h', '--hotel_center_account_id', type=six.text_type,
+    parser.add_argument('-a', '--hotel_center_account_id', type=int,
                         required=True, help='The hotel center account ID.')
     args = parser.parse_args()
 

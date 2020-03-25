@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,19 +15,17 @@
 """Demonstrates how to add a campaign-level bid modifier for call interactions.
 """
 
-from __future__ import absolute_import
 
 import argparse
-import six
 import sys
 
 import google.ads.google_ads.client
 
 
 def main(client, customer_id, campaign_id, bid_modifier_value):
-    campaign_service = client.get_service('CampaignService', version='v1')
+    campaign_service = client.get_service('CampaignService', version='v3')
     campaign_bm_service = client.get_service('CampaignBidModifierService',
-                                             version='v1')
+                                             version='v3')
 
     # Create campaign bid modifier for call interactions with the specified
     # campaign ID and bid modifier value.
@@ -43,7 +42,7 @@ def main(client, customer_id, campaign_id, bid_modifier_value):
 
     # Sets the interaction type.
     campaign_bid_modifier.interaction_type.type = (
-        client.get_type('InteractionTypeEnum', version='v1').CALLS)
+        client.get_type('InteractionTypeEnum', version='v3').CALLS)
 
     # Add the campaign bid modifier.
     try:
@@ -74,9 +73,9 @@ if __name__ == '__main__':
         description=('Adds a bid modifier to the specified campaign ID, for '
                      'the given customer ID.'))
     # The following argument(s) should be provided to run the example.
-    parser.add_argument('-c', '--customer_id', type=six.text_type,
+    parser.add_argument('-c', '--customer_id', type=str,
                         required=True, help='The Google Ads customer ID.')
-    parser.add_argument('-i', '--campaign_id', type=six.text_type,
+    parser.add_argument('-i', '--campaign_id', type=str,
                         required=True, help='The campaign ID.')
     parser.add_argument('-b', '--bid_modifier_value', type=float,
                         required=False, default=1.5,

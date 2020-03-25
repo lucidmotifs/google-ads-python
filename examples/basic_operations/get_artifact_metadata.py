@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,10 +21,8 @@ metrics.impressions, campaign.id). It also shows the data type and artifacts
 that are selectable with the artifact.
 """
 
-from __future__ import absolute_import
 
 import argparse
-import six
 import sys
 import google.ads.google_ads.client
 
@@ -44,7 +43,7 @@ def _is_or_is_not(bool_value):
 
 
 def main(client, artifact_name, page_size):
-    gaf_service = client.get_service('GoogleAdsFieldService', version='v1')
+    gaf_service = client.get_service('GoogleAdsFieldService', version='v3')
 
     # Searches for an artifact with the specified name.
     query = ('SELECT name, category, selectable, filterable, sortable, '
@@ -107,7 +106,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Lists metadata for the specified artifact.')
     # The following argument(s) should be provided to run the example.
-    parser.add_argument('-a', '--artifact_name', type=six.text_type,
+    parser.add_argument('-a', '--artifact_name', type=str,
                         required=True,
                         help='The name of the artifact for which we are '
                         'retrieving metadata.')

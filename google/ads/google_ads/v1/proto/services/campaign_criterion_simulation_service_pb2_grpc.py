@@ -6,7 +6,9 @@ from google.ads.google_ads.v1.proto.services import campaign_criterion_simulatio
 
 
 class CampaignCriterionSimulationServiceStub(object):
-  """Service to fetch campaign criterion simulations.
+  """Proto file describing the CampaignCriterionSimulation service.
+
+  Service to fetch campaign criterion simulations.
   """
 
   def __init__(self, channel):
@@ -23,7 +25,9 @@ class CampaignCriterionSimulationServiceStub(object):
 
 
 class CampaignCriterionSimulationServiceServicer(object):
-  """Service to fetch campaign criterion simulations.
+  """Proto file describing the CampaignCriterionSimulation service.
+
+  Service to fetch campaign criterion simulations.
   """
 
   def GetCampaignCriterionSimulation(self, request, context):

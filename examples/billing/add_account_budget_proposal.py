@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,12 +17,10 @@
 To get account budget proposal, run get_account_budget_proposals.py
 """
 
-from __future__ import absolute_import
 
 import argparse
 import sys
 
-import six
 
 import google.ads.google_ads.client
 
@@ -30,7 +29,7 @@ def main(client, customer_id, billing_setup_id):
     account_budget_proposal_service = client.get_service(
         'AccountBudgetProposalService')
     billing_setup_service = client.get_service('BillingSetupService',
-                                               version='v1')
+                                               version='v3')
 
     account_budget_proposal_operation = client.get_type(
         'AccountBudgetProposalOperation')
@@ -44,7 +43,7 @@ def main(client, customer_id, billing_setup_id):
 
     # Specify the account budget starts immediately
     proposal.proposed_start_time_type = client.get_type('TimeTypeEnum',
-                                                        version='v1').NOW
+                                                        version='v3').NOW
     # Alternatively you can specify a specific start time. Refer to the
     # AccountBudgetProposal resource documentation for allowed formats.
     #
@@ -52,7 +51,7 @@ def main(client, customer_id, billing_setup_id):
 
     # Specify that the budget runs forever
     proposal.proposed_end_time_type = client.get_type('TimeTypeEnum',
-                                                      version='v1').FOREVER
+                                                      version='v3').FOREVER
     # Alternatively you can specify a specific end time. Allowed formats are as
     # above.
     #
@@ -92,9 +91,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Creates an account budget proposal.')
     # The following argument(s) should be provided to run the example.
-    parser.add_argument('-c', '--customer_id', type=six.text_type,
+    parser.add_argument('-c', '--customer_id', type=str,
                         required=True, help='The Ads customer ID.')
-    parser.add_argument('-b', '--billing_setup_id', type=six.text_type,
+    parser.add_argument('-b', '--billing_setup_id', type=str,
                         required=True, help='The billing setup ID.')
     args = parser.parse_args()
 

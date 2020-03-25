@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,10 +17,8 @@
 To retrieve recommendations for text ads, run get_text_ad_recommendations.py.
 """
 
-from __future__ import absolute_import
 
 import argparse
-import six
 import sys
 
 import google.ads.google_ads.client
@@ -27,7 +26,7 @@ import google.ads.google_ads.client
 
 def main(client, customer_id, recommendation_id):
     recommendation_service = client.get_service('RecommendationService',
-                                                version='v1')
+                                                version='v3')
 
     apply_recommendation_operation = client.get_type(
         'ApplyRecommendationOperation')
@@ -63,9 +62,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description=('Pauses an ad in the specified customer\'s ad group.'))
     # The following argument(s) should be provided to run the example.
-    parser.add_argument('-c', '--customer_id', type=six.text_type,
+    parser.add_argument('-c', '--customer_id', type=str,
                         required=True, help='The Google Ads customer ID.')
-    parser.add_argument('-r', '--recommendation_id', type=six.text_type,
+    parser.add_argument('-r', '--recommendation_id', type=str,
                         required=True, help='The recommendation ID.')
     args = parser.parse_args()
 

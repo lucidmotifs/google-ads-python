@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,11 +17,9 @@
 To get campaigns, run get_campaigns.py.
 """
 
-from __future__ import absolute_import
 
 import argparse
 import datetime
-import six
 import sys
 import uuid
 
@@ -32,12 +31,12 @@ _DATE_FORMAT = '%Y%m%d'
 
 def main(client, customer_id):
     campaign_budget_service = client.get_service('CampaignBudgetService',
-                                                 version='v1')
-    campaign_service = client.get_service('CampaignService', version='v1')
+                                                 version='v3')
+    campaign_service = client.get_service('CampaignService', version='v3')
 
     # Create a budget, which can be shared by multiple campaigns.
     campaign_budget_operation = client.get_type('CampaignBudgetOperation',
-                                                version='v1')
+                                                version='v3')
     campaign_budget = campaign_budget_operation.create
     campaign_budget.name.value = 'Interplanetary Budget %s' % uuid.uuid4()
     campaign_budget.delivery_method = client.get_type(
@@ -60,7 +59,7 @@ def main(client, customer_id):
         sys.exit(1)
 
     # Create campaign.
-    campaign_operation = client.get_type('CampaignOperation', version='v1')
+    campaign_operation = client.get_type('CampaignOperation', version='v3')
     campaign = campaign_operation.create
     campaign.name.value = 'Interplanetary Cruise %s' % uuid.uuid4()
     campaign.advertising_channel_type = client.get_type(
@@ -69,7 +68,7 @@ def main(client, customer_id):
     # Recommendation: Set the campaign to PAUSED when creating it to prevent
     # the ads from immediately serving. Set to ENABLED once you've added
     # targeting and the ads are ready to serve.
-    campaign.status = client.get_type('CampaignStatusEnum', version='v1').PAUSED
+    campaign.status = client.get_type('CampaignStatusEnum', version='v3').PAUSED
 
     # Set the bidding strategy and budget.
     campaign.manual_cpc.enhanced_cpc_enabled.value = True
@@ -117,7 +116,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Adds a campaign for specified customer.')
     # The following argument(s) should be provided to run the example.
-    parser.add_argument('-c', '--customer_id', type=six.text_type,
+    parser.add_argument('-c', '--customer_id', type=str,
                         required=True, help='The Google Ads customer ID.')
     args = parser.parse_args()
 

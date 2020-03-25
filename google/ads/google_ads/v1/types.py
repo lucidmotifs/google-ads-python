@@ -14,13 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
 import sys
 
 from google.api_core.protobuf_helpers import get_messages
 
 from google.ads.google_ads.v1.proto.common import ad_asset_pb2
 from google.ads.google_ads.v1.proto.common import ad_type_infos_pb2
+from google.ads.google_ads.v1.proto.common import asset_types_pb2
 from google.ads.google_ads.v1.proto.common import bidding_pb2
 from google.ads.google_ads.v1.proto.common import click_location_pb2
 from google.ads.google_ads.v1.proto.common import criteria_pb2
@@ -30,6 +30,7 @@ from google.ads.google_ads.v1.proto.common import dates_pb2
 from google.ads.google_ads.v1.proto.common import explorer_auto_optimizer_setting_pb2
 from google.ads.google_ads.v1.proto.common import extensions_pb2
 from google.ads.google_ads.v1.proto.common import feed_common_pb2
+from google.ads.google_ads.v1.proto.common import final_app_url_pb2
 from google.ads.google_ads.v1.proto.common import frequency_cap_pb2
 from google.ads.google_ads.v1.proto.common import keyword_plan_common_pb2
 from google.ads.google_ads.v1.proto.common import matching_function_pb2
@@ -37,6 +38,7 @@ from google.ads.google_ads.v1.proto.common import metrics_pb2
 from google.ads.google_ads.v1.proto.common import policy_pb2
 from google.ads.google_ads.v1.proto.common import real_time_bidding_setting_pb2
 from google.ads.google_ads.v1.proto.common import segments_pb2
+from google.ads.google_ads.v1.proto.common import simulation_pb2
 from google.ads.google_ads.v1.proto.common import tag_snippet_pb2
 from google.ads.google_ads.v1.proto.common import targeting_setting_pb2
 from google.ads.google_ads.v1.proto.common import text_label_pb2
@@ -50,6 +52,7 @@ from google.ads.google_ads.v1.proto.enums import account_budget_status_pb2
 from google.ads.google_ads.v1.proto.enums import ad_customizer_placeholder_field_pb2
 from google.ads.google_ads.v1.proto.enums import ad_group_ad_rotation_mode_pb2
 from google.ads.google_ads.v1.proto.enums import ad_group_ad_status_pb2
+from google.ads.google_ads.v1.proto.enums import ad_group_criterion_approval_status_pb2
 from google.ads.google_ads.v1.proto.enums import ad_group_criterion_status_pb2
 from google.ads.google_ads.v1.proto.enums import ad_group_status_pb2
 from google.ads.google_ads.v1.proto.enums import ad_group_type_pb2
@@ -62,9 +65,13 @@ from google.ads.google_ads.v1.proto.enums import advertising_channel_type_pb2
 from google.ads.google_ads.v1.proto.enums import affiliate_location_feed_relationship_type_pb2
 from google.ads.google_ads.v1.proto.enums import affiliate_location_placeholder_field_pb2
 from google.ads.google_ads.v1.proto.enums import age_range_type_pb2
+from google.ads.google_ads.v1.proto.enums import app_campaign_app_store_pb2
+from google.ads.google_ads.v1.proto.enums import app_campaign_bidding_strategy_goal_type_pb2
 from google.ads.google_ads.v1.proto.enums import app_payment_model_type_pb2
 from google.ads.google_ads.v1.proto.enums import app_placeholder_field_pb2
 from google.ads.google_ads.v1.proto.enums import app_store_pb2
+from google.ads.google_ads.v1.proto.enums import app_url_operating_system_type_pb2
+from google.ads.google_ads.v1.proto.enums import asset_type_pb2
 from google.ads.google_ads.v1.proto.enums import attribution_model_pb2
 from google.ads.google_ads.v1.proto.enums import bid_modifier_source_pb2
 from google.ads.google_ads.v1.proto.enums import bidding_source_pb2
@@ -75,9 +82,15 @@ from google.ads.google_ads.v1.proto.enums import brand_safety_suitability_pb2
 from google.ads.google_ads.v1.proto.enums import budget_delivery_method_pb2
 from google.ads.google_ads.v1.proto.enums import budget_period_pb2
 from google.ads.google_ads.v1.proto.enums import budget_status_pb2
+from google.ads.google_ads.v1.proto.enums import budget_type_pb2
 from google.ads.google_ads.v1.proto.enums import call_conversion_reporting_state_pb2
 from google.ads.google_ads.v1.proto.enums import call_placeholder_field_pb2
 from google.ads.google_ads.v1.proto.enums import callout_placeholder_field_pb2
+from google.ads.google_ads.v1.proto.enums import campaign_criterion_status_pb2
+from google.ads.google_ads.v1.proto.enums import campaign_draft_status_pb2
+from google.ads.google_ads.v1.proto.enums import campaign_experiment_status_pb2
+from google.ads.google_ads.v1.proto.enums import campaign_experiment_traffic_split_type_pb2
+from google.ads.google_ads.v1.proto.enums import campaign_experiment_type_pb2
 from google.ads.google_ads.v1.proto.enums import campaign_serving_status_pb2
 from google.ads.google_ads.v1.proto.enums import campaign_shared_set_status_pb2
 from google.ads.google_ads.v1.proto.enums import campaign_status_pb2
@@ -89,6 +102,7 @@ from google.ads.google_ads.v1.proto.enums import conversion_action_category_pb2
 from google.ads.google_ads.v1.proto.enums import conversion_action_counting_type_pb2
 from google.ads.google_ads.v1.proto.enums import conversion_action_status_pb2
 from google.ads.google_ads.v1.proto.enums import conversion_action_type_pb2
+from google.ads.google_ads.v1.proto.enums import conversion_adjustment_type_pb2
 from google.ads.google_ads.v1.proto.enums import conversion_attribution_event_type_pb2
 from google.ads.google_ads.v1.proto.enums import conversion_lag_bucket_pb2
 from google.ads.google_ads.v1.proto.enums import conversion_or_adjustment_lag_bucket_pb2
@@ -101,10 +115,12 @@ from google.ads.google_ads.v1.proto.enums import custom_interest_status_pb2
 from google.ads.google_ads.v1.proto.enums import custom_interest_type_pb2
 from google.ads.google_ads.v1.proto.enums import custom_placeholder_field_pb2
 from google.ads.google_ads.v1.proto.enums import customer_match_upload_key_type_pb2
+from google.ads.google_ads.v1.proto.enums import customer_pay_per_conversion_eligibility_failure_reason_pb2
 from google.ads.google_ads.v1.proto.enums import data_driven_model_status_pb2
 from google.ads.google_ads.v1.proto.enums import day_of_week_pb2
 from google.ads.google_ads.v1.proto.enums import device_pb2
 from google.ads.google_ads.v1.proto.enums import display_ad_format_setting_pb2
+from google.ads.google_ads.v1.proto.enums import display_upload_product_type_pb2
 from google.ads.google_ads.v1.proto.enums import dsa_page_feed_criterion_field_pb2
 from google.ads.google_ads.v1.proto.enums import education_placeholder_field_pb2
 from google.ads.google_ads.v1.proto.enums import extension_setting_device_pb2
@@ -134,6 +150,7 @@ from google.ads.google_ads.v1.proto.enums import google_ads_field_category_pb2
 from google.ads.google_ads.v1.proto.enums import google_ads_field_data_type_pb2
 from google.ads.google_ads.v1.proto.enums import hotel_date_selection_type_pb2
 from google.ads.google_ads.v1.proto.enums import hotel_placeholder_field_pb2
+from google.ads.google_ads.v1.proto.enums import hotel_rate_type_pb2
 from google.ads.google_ads.v1.proto.enums import income_range_type_pb2
 from google.ads.google_ads.v1.proto.enums import interaction_event_type_pb2
 from google.ads.google_ads.v1.proto.enums import interaction_type_pb2
@@ -143,10 +160,12 @@ from google.ads.google_ads.v1.proto.enums import keyword_plan_competition_level_
 from google.ads.google_ads.v1.proto.enums import keyword_plan_forecast_interval_pb2
 from google.ads.google_ads.v1.proto.enums import keyword_plan_network_pb2
 from google.ads.google_ads.v1.proto.enums import label_status_pb2
+from google.ads.google_ads.v1.proto.enums import legacy_app_install_ad_app_store_pb2
 from google.ads.google_ads.v1.proto.enums import listing_custom_attribute_index_pb2
 from google.ads.google_ads.v1.proto.enums import listing_group_type_pb2
 from google.ads.google_ads.v1.proto.enums import local_placeholder_field_pb2
 from google.ads.google_ads.v1.proto.enums import location_extension_targeting_criterion_field_pb2
+from google.ads.google_ads.v1.proto.enums import location_group_radius_units_pb2
 from google.ads.google_ads.v1.proto.enums import location_placeholder_field_pb2
 from google.ads.google_ads.v1.proto.enums import manager_link_status_pb2
 from google.ads.google_ads.v1.proto.enums import matching_function_context_type_pb2
@@ -163,12 +182,14 @@ from google.ads.google_ads.v1.proto.enums import negative_geo_target_type_pb2
 from google.ads.google_ads.v1.proto.enums import operating_system_version_operator_type_pb2
 from google.ads.google_ads.v1.proto.enums import page_one_promoted_strategy_goal_pb2
 from google.ads.google_ads.v1.proto.enums import parental_status_type_pb2
+from google.ads.google_ads.v1.proto.enums import payment_mode_pb2
 from google.ads.google_ads.v1.proto.enums import placeholder_type_pb2
 from google.ads.google_ads.v1.proto.enums import placement_type_pb2
 from google.ads.google_ads.v1.proto.enums import policy_approval_status_pb2
 from google.ads.google_ads.v1.proto.enums import policy_review_status_pb2
 from google.ads.google_ads.v1.proto.enums import policy_topic_entry_type_pb2
 from google.ads.google_ads.v1.proto.enums import policy_topic_evidence_destination_mismatch_url_type_pb2
+from google.ads.google_ads.v1.proto.enums import policy_topic_evidence_destination_not_working_device_pb2
 from google.ads.google_ads.v1.proto.enums import positive_geo_target_type_pb2
 from google.ads.google_ads.v1.proto.enums import preferred_content_type_pb2
 from google.ads.google_ads.v1.proto.enums import price_extension_price_qualifier_pb2
@@ -188,11 +209,14 @@ from google.ads.google_ads.v1.proto.enums import proximity_radius_units_pb2
 from google.ads.google_ads.v1.proto.enums import quality_score_bucket_pb2
 from google.ads.google_ads.v1.proto.enums import real_estate_placeholder_field_pb2
 from google.ads.google_ads.v1.proto.enums import recommendation_type_pb2
+from google.ads.google_ads.v1.proto.enums import search_engine_results_page_type_pb2
 from google.ads.google_ads.v1.proto.enums import search_term_match_type_pb2
 from google.ads.google_ads.v1.proto.enums import search_term_targeting_status_pb2
 from google.ads.google_ads.v1.proto.enums import served_asset_field_type_pb2
 from google.ads.google_ads.v1.proto.enums import shared_set_status_pb2
 from google.ads.google_ads.v1.proto.enums import shared_set_type_pb2
+from google.ads.google_ads.v1.proto.enums import simulation_modification_method_pb2
+from google.ads.google_ads.v1.proto.enums import simulation_type_pb2
 from google.ads.google_ads.v1.proto.enums import sitelink_placeholder_field_pb2
 from google.ads.google_ads.v1.proto.enums import slot_pb2
 from google.ads.google_ads.v1.proto.enums import spending_limit_type_pb2
@@ -234,6 +258,7 @@ from google.ads.google_ads.v1.proto.errors import ad_group_feed_error_pb2
 from google.ads.google_ads.v1.proto.errors import ad_parameter_error_pb2
 from google.ads.google_ads.v1.proto.errors import ad_sharing_error_pb2
 from google.ads.google_ads.v1.proto.errors import adx_error_pb2
+from google.ads.google_ads.v1.proto.errors import asset_error_pb2
 from google.ads.google_ads.v1.proto.errors import authentication_error_pb2
 from google.ads.google_ads.v1.proto.errors import authorization_error_pb2
 from google.ads.google_ads.v1.proto.errors import bidding_error_pb2
@@ -241,13 +266,16 @@ from google.ads.google_ads.v1.proto.errors import bidding_strategy_error_pb2
 from google.ads.google_ads.v1.proto.errors import billing_setup_error_pb2
 from google.ads.google_ads.v1.proto.errors import campaign_budget_error_pb2
 from google.ads.google_ads.v1.proto.errors import campaign_criterion_error_pb2
+from google.ads.google_ads.v1.proto.errors import campaign_draft_error_pb2
 from google.ads.google_ads.v1.proto.errors import campaign_error_pb2
+from google.ads.google_ads.v1.proto.errors import campaign_experiment_error_pb2
 from google.ads.google_ads.v1.proto.errors import campaign_feed_error_pb2
 from google.ads.google_ads.v1.proto.errors import campaign_shared_set_error_pb2
 from google.ads.google_ads.v1.proto.errors import change_status_error_pb2
 from google.ads.google_ads.v1.proto.errors import collection_size_error_pb2
 from google.ads.google_ads.v1.proto.errors import context_error_pb2
 from google.ads.google_ads.v1.proto.errors import conversion_action_error_pb2
+from google.ads.google_ads.v1.proto.errors import conversion_adjustment_upload_error_pb2
 from google.ads.google_ads.v1.proto.errors import conversion_upload_error_pb2
 from google.ads.google_ads.v1.proto.errors import country_code_error_pb2
 from google.ads.google_ads.v1.proto.errors import criterion_error_pb2
@@ -288,13 +316,16 @@ from google.ads.google_ads.v1.proto.errors import keyword_plan_negative_keyword_
 from google.ads.google_ads.v1.proto.errors import label_error_pb2
 from google.ads.google_ads.v1.proto.errors import language_code_error_pb2
 from google.ads.google_ads.v1.proto.errors import list_operation_error_pb2
+from google.ads.google_ads.v1.proto.errors import manager_link_error_pb2
 from google.ads.google_ads.v1.proto.errors import media_bundle_error_pb2
 from google.ads.google_ads.v1.proto.errors import media_file_error_pb2
+from google.ads.google_ads.v1.proto.errors import media_upload_error_pb2
 from google.ads.google_ads.v1.proto.errors import multiplier_error_pb2
 from google.ads.google_ads.v1.proto.errors import mutate_error_pb2
 from google.ads.google_ads.v1.proto.errors import mutate_job_error_pb2
 from google.ads.google_ads.v1.proto.errors import new_resource_creation_error_pb2
 from google.ads.google_ads.v1.proto.errors import not_empty_error_pb2
+from google.ads.google_ads.v1.proto.errors import not_whitelisted_error_pb2
 from google.ads.google_ads.v1.proto.errors import null_error_pb2
 from google.ads.google_ads.v1.proto.errors import operation_access_denied_error_pb2
 from google.ads.google_ads.v1.proto.errors import operator_error_pb2
@@ -313,10 +344,12 @@ from google.ads.google_ads.v1.proto.errors import resource_count_limit_exceeded_
 from google.ads.google_ads.v1.proto.errors import setting_error_pb2
 from google.ads.google_ads.v1.proto.errors import shared_criterion_error_pb2
 from google.ads.google_ads.v1.proto.errors import shared_set_error_pb2
+from google.ads.google_ads.v1.proto.errors import size_limit_error_pb2
 from google.ads.google_ads.v1.proto.errors import string_format_error_pb2
 from google.ads.google_ads.v1.proto.errors import string_length_error_pb2
 from google.ads.google_ads.v1.proto.errors import url_field_error_pb2
 from google.ads.google_ads.v1.proto.errors import user_list_error_pb2
+from google.ads.google_ads.v1.proto.errors import youtube_video_registration_error_pb2
 from google.ads.google_ads.v1.proto.resources import account_budget_pb2
 from google.ads.google_ads.v1.proto.resources import account_budget_proposal_pb2
 from google.ads.google_ads.v1.proto.resources import ad_group_ad_label_pb2
@@ -325,20 +358,26 @@ from google.ads.google_ads.v1.proto.resources import ad_group_audience_view_pb2
 from google.ads.google_ads.v1.proto.resources import ad_group_bid_modifier_pb2
 from google.ads.google_ads.v1.proto.resources import ad_group_criterion_label_pb2
 from google.ads.google_ads.v1.proto.resources import ad_group_criterion_pb2
+from google.ads.google_ads.v1.proto.resources import ad_group_criterion_simulation_pb2
 from google.ads.google_ads.v1.proto.resources import ad_group_extension_setting_pb2
 from google.ads.google_ads.v1.proto.resources import ad_group_feed_pb2
 from google.ads.google_ads.v1.proto.resources import ad_group_label_pb2
 from google.ads.google_ads.v1.proto.resources import ad_group_pb2
+from google.ads.google_ads.v1.proto.resources import ad_group_simulation_pb2
 from google.ads.google_ads.v1.proto.resources import ad_parameter_pb2
 from google.ads.google_ads.v1.proto.resources import ad_pb2
 from google.ads.google_ads.v1.proto.resources import ad_schedule_view_pb2
 from google.ads.google_ads.v1.proto.resources import age_range_view_pb2
+from google.ads.google_ads.v1.proto.resources import asset_pb2
 from google.ads.google_ads.v1.proto.resources import bidding_strategy_pb2
 from google.ads.google_ads.v1.proto.resources import billing_setup_pb2
 from google.ads.google_ads.v1.proto.resources import campaign_audience_view_pb2
 from google.ads.google_ads.v1.proto.resources import campaign_bid_modifier_pb2
 from google.ads.google_ads.v1.proto.resources import campaign_budget_pb2
 from google.ads.google_ads.v1.proto.resources import campaign_criterion_pb2
+from google.ads.google_ads.v1.proto.resources import campaign_criterion_simulation_pb2
+from google.ads.google_ads.v1.proto.resources import campaign_draft_pb2
+from google.ads.google_ads.v1.proto.resources import campaign_experiment_pb2
 from google.ads.google_ads.v1.proto.resources import campaign_extension_setting_pb2
 from google.ads.google_ads.v1.proto.resources import campaign_feed_pb2
 from google.ads.google_ads.v1.proto.resources import campaign_label_pb2
@@ -361,6 +400,7 @@ from google.ads.google_ads.v1.proto.resources import detail_placement_view_pb2
 from google.ads.google_ads.v1.proto.resources import display_keyword_view_pb2
 from google.ads.google_ads.v1.proto.resources import domain_category_pb2
 from google.ads.google_ads.v1.proto.resources import dynamic_search_ads_search_term_view_pb2
+from google.ads.google_ads.v1.proto.resources import expanded_landing_page_view_pb2
 from google.ads.google_ads.v1.proto.resources import extension_feed_item_pb2
 from google.ads.google_ads.v1.proto.resources import feed_item_pb2
 from google.ads.google_ads.v1.proto.resources import feed_item_target_pb2
@@ -381,6 +421,7 @@ from google.ads.google_ads.v1.proto.resources import keyword_plan_negative_keywo
 from google.ads.google_ads.v1.proto.resources import keyword_plan_pb2
 from google.ads.google_ads.v1.proto.resources import keyword_view_pb2
 from google.ads.google_ads.v1.proto.resources import label_pb2
+from google.ads.google_ads.v1.proto.resources import landing_page_view_pb2
 from google.ads.google_ads.v1.proto.resources import language_constant_pb2
 from google.ads.google_ads.v1.proto.resources import location_view_pb2
 from google.ads.google_ads.v1.proto.resources import managed_placement_view_pb2
@@ -390,6 +431,7 @@ from google.ads.google_ads.v1.proto.resources import mobile_app_category_constan
 from google.ads.google_ads.v1.proto.resources import mobile_device_constant_pb2
 from google.ads.google_ads.v1.proto.resources import mutate_job_pb2
 from google.ads.google_ads.v1.proto.resources import operating_system_version_constant_pb2
+from google.ads.google_ads.v1.proto.resources import paid_organic_search_term_view_pb2
 from google.ads.google_ads.v1.proto.resources import parental_status_view_pb2
 from google.ads.google_ads.v1.proto.resources import payments_account_pb2
 from google.ads.google_ads.v1.proto.resources import product_bidding_category_constant_pb2
@@ -413,19 +455,25 @@ from google.ads.google_ads.v1.proto.services import ad_group_audience_view_servi
 from google.ads.google_ads.v1.proto.services import ad_group_bid_modifier_service_pb2
 from google.ads.google_ads.v1.proto.services import ad_group_criterion_label_service_pb2
 from google.ads.google_ads.v1.proto.services import ad_group_criterion_service_pb2
+from google.ads.google_ads.v1.proto.services import ad_group_criterion_simulation_service_pb2
 from google.ads.google_ads.v1.proto.services import ad_group_extension_setting_service_pb2
 from google.ads.google_ads.v1.proto.services import ad_group_feed_service_pb2
 from google.ads.google_ads.v1.proto.services import ad_group_label_service_pb2
 from google.ads.google_ads.v1.proto.services import ad_group_service_pb2
+from google.ads.google_ads.v1.proto.services import ad_group_simulation_service_pb2
 from google.ads.google_ads.v1.proto.services import ad_parameter_service_pb2
 from google.ads.google_ads.v1.proto.services import ad_schedule_view_service_pb2
 from google.ads.google_ads.v1.proto.services import age_range_view_service_pb2
+from google.ads.google_ads.v1.proto.services import asset_service_pb2
 from google.ads.google_ads.v1.proto.services import bidding_strategy_service_pb2
 from google.ads.google_ads.v1.proto.services import billing_setup_service_pb2
 from google.ads.google_ads.v1.proto.services import campaign_audience_view_service_pb2
 from google.ads.google_ads.v1.proto.services import campaign_bid_modifier_service_pb2
 from google.ads.google_ads.v1.proto.services import campaign_budget_service_pb2
 from google.ads.google_ads.v1.proto.services import campaign_criterion_service_pb2
+from google.ads.google_ads.v1.proto.services import campaign_criterion_simulation_service_pb2
+from google.ads.google_ads.v1.proto.services import campaign_draft_service_pb2
+from google.ads.google_ads.v1.proto.services import campaign_experiment_service_pb2
 from google.ads.google_ads.v1.proto.services import campaign_extension_setting_service_pb2
 from google.ads.google_ads.v1.proto.services import campaign_feed_service_pb2
 from google.ads.google_ads.v1.proto.services import campaign_label_service_pb2
@@ -435,6 +483,7 @@ from google.ads.google_ads.v1.proto.services import carrier_constant_service_pb2
 from google.ads.google_ads.v1.proto.services import change_status_service_pb2
 from google.ads.google_ads.v1.proto.services import click_view_service_pb2
 from google.ads.google_ads.v1.proto.services import conversion_action_service_pb2
+from google.ads.google_ads.v1.proto.services import conversion_adjustment_upload_service_pb2
 from google.ads.google_ads.v1.proto.services import conversion_upload_service_pb2
 from google.ads.google_ads.v1.proto.services import custom_interest_service_pb2
 from google.ads.google_ads.v1.proto.services import customer_client_link_service_pb2
@@ -449,6 +498,7 @@ from google.ads.google_ads.v1.proto.services import detail_placement_view_servic
 from google.ads.google_ads.v1.proto.services import display_keyword_view_service_pb2
 from google.ads.google_ads.v1.proto.services import domain_category_service_pb2
 from google.ads.google_ads.v1.proto.services import dynamic_search_ads_search_term_view_service_pb2
+from google.ads.google_ads.v1.proto.services import expanded_landing_page_view_service_pb2
 from google.ads.google_ads.v1.proto.services import extension_feed_item_service_pb2
 from google.ads.google_ads.v1.proto.services import feed_item_service_pb2
 from google.ads.google_ads.v1.proto.services import feed_item_target_service_pb2
@@ -471,6 +521,7 @@ from google.ads.google_ads.v1.proto.services import keyword_plan_negative_keywor
 from google.ads.google_ads.v1.proto.services import keyword_plan_service_pb2
 from google.ads.google_ads.v1.proto.services import keyword_view_service_pb2
 from google.ads.google_ads.v1.proto.services import label_service_pb2
+from google.ads.google_ads.v1.proto.services import landing_page_view_service_pb2
 from google.ads.google_ads.v1.proto.services import language_constant_service_pb2
 from google.ads.google_ads.v1.proto.services import location_view_service_pb2
 from google.ads.google_ads.v1.proto.services import managed_placement_view_service_pb2
@@ -480,6 +531,7 @@ from google.ads.google_ads.v1.proto.services import mobile_app_category_constant
 from google.ads.google_ads.v1.proto.services import mobile_device_constant_service_pb2
 from google.ads.google_ads.v1.proto.services import mutate_job_service_pb2
 from google.ads.google_ads.v1.proto.services import operating_system_version_constant_service_pb2
+from google.ads.google_ads.v1.proto.services import paid_organic_search_term_view_service_pb2
 from google.ads.google_ads.v1.proto.services import parental_status_view_service_pb2
 from google.ads.google_ads.v1.proto.services import payments_account_service_pb2
 from google.ads.google_ads.v1.proto.services import product_bidding_category_constant_service_pb2
@@ -495,10 +547,8 @@ from google.ads.google_ads.v1.proto.services import topic_view_service_pb2
 from google.ads.google_ads.v1.proto.services import user_interest_service_pb2
 from google.ads.google_ads.v1.proto.services import user_list_service_pb2
 from google.ads.google_ads.v1.proto.services import video_service_pb2
-from google.api import http_pb2
 from google.longrunning import operations_pb2
 from google.protobuf import any_pb2
-from google.protobuf import descriptor_pb2
 from google.protobuf import empty_pb2
 from google.protobuf import field_mask_pb2
 from google.protobuf import wrappers_pb2
@@ -507,6 +557,7 @@ from google.rpc import status_pb2
 _shared_modules = [
     ad_asset_pb2,
     ad_type_infos_pb2,
+    asset_types_pb2,
     bidding_pb2,
     click_location_pb2,
     criteria_pb2,
@@ -516,6 +567,7 @@ _shared_modules = [
     explorer_auto_optimizer_setting_pb2,
     extensions_pb2,
     feed_common_pb2,
+    final_app_url_pb2,
     frequency_cap_pb2,
     keyword_plan_common_pb2,
     matching_function_pb2,
@@ -523,6 +575,7 @@ _shared_modules = [
     policy_pb2,
     real_time_bidding_setting_pb2,
     segments_pb2,
+    simulation_pb2,
     tag_snippet_pb2,
     targeting_setting_pb2,
     text_label_pb2,
@@ -536,6 +589,7 @@ _shared_modules = [
     ad_customizer_placeholder_field_pb2,
     ad_group_ad_rotation_mode_pb2,
     ad_group_ad_status_pb2,
+    ad_group_criterion_approval_status_pb2,
     ad_group_criterion_status_pb2,
     ad_group_status_pb2,
     ad_group_type_pb2,
@@ -548,9 +602,13 @@ _shared_modules = [
     affiliate_location_feed_relationship_type_pb2,
     affiliate_location_placeholder_field_pb2,
     age_range_type_pb2,
+    app_campaign_app_store_pb2,
+    app_campaign_bidding_strategy_goal_type_pb2,
     app_payment_model_type_pb2,
     app_placeholder_field_pb2,
     app_store_pb2,
+    app_url_operating_system_type_pb2,
+    asset_type_pb2,
     attribution_model_pb2,
     bid_modifier_source_pb2,
     bidding_source_pb2,
@@ -561,9 +619,15 @@ _shared_modules = [
     budget_delivery_method_pb2,
     budget_period_pb2,
     budget_status_pb2,
+    budget_type_pb2,
     call_conversion_reporting_state_pb2,
     call_placeholder_field_pb2,
     callout_placeholder_field_pb2,
+    campaign_criterion_status_pb2,
+    campaign_draft_status_pb2,
+    campaign_experiment_status_pb2,
+    campaign_experiment_traffic_split_type_pb2,
+    campaign_experiment_type_pb2,
     campaign_serving_status_pb2,
     campaign_shared_set_status_pb2,
     campaign_status_pb2,
@@ -575,6 +639,7 @@ _shared_modules = [
     conversion_action_counting_type_pb2,
     conversion_action_status_pb2,
     conversion_action_type_pb2,
+    conversion_adjustment_type_pb2,
     conversion_attribution_event_type_pb2,
     conversion_lag_bucket_pb2,
     conversion_or_adjustment_lag_bucket_pb2,
@@ -587,10 +652,12 @@ _shared_modules = [
     custom_interest_type_pb2,
     custom_placeholder_field_pb2,
     customer_match_upload_key_type_pb2,
+    customer_pay_per_conversion_eligibility_failure_reason_pb2,
     data_driven_model_status_pb2,
     day_of_week_pb2,
     device_pb2,
     display_ad_format_setting_pb2,
+    display_upload_product_type_pb2,
     dsa_page_feed_criterion_field_pb2,
     education_placeholder_field_pb2,
     extension_setting_device_pb2,
@@ -620,6 +687,7 @@ _shared_modules = [
     google_ads_field_data_type_pb2,
     hotel_date_selection_type_pb2,
     hotel_placeholder_field_pb2,
+    hotel_rate_type_pb2,
     income_range_type_pb2,
     interaction_event_type_pb2,
     interaction_type_pb2,
@@ -629,10 +697,12 @@ _shared_modules = [
     keyword_plan_forecast_interval_pb2,
     keyword_plan_network_pb2,
     label_status_pb2,
+    legacy_app_install_ad_app_store_pb2,
     listing_custom_attribute_index_pb2,
     listing_group_type_pb2,
     local_placeholder_field_pb2,
     location_extension_targeting_criterion_field_pb2,
+    location_group_radius_units_pb2,
     location_placeholder_field_pb2,
     manager_link_status_pb2,
     matching_function_context_type_pb2,
@@ -649,12 +719,14 @@ _shared_modules = [
     operating_system_version_operator_type_pb2,
     page_one_promoted_strategy_goal_pb2,
     parental_status_type_pb2,
+    payment_mode_pb2,
     placeholder_type_pb2,
     placement_type_pb2,
     policy_approval_status_pb2,
     policy_review_status_pb2,
     policy_topic_entry_type_pb2,
     policy_topic_evidence_destination_mismatch_url_type_pb2,
+    policy_topic_evidence_destination_not_working_device_pb2,
     positive_geo_target_type_pb2,
     preferred_content_type_pb2,
     price_extension_price_qualifier_pb2,
@@ -674,11 +746,14 @@ _shared_modules = [
     quality_score_bucket_pb2,
     real_estate_placeholder_field_pb2,
     recommendation_type_pb2,
+    search_engine_results_page_type_pb2,
     search_term_match_type_pb2,
     search_term_targeting_status_pb2,
     served_asset_field_type_pb2,
     shared_set_status_pb2,
     shared_set_type_pb2,
+    simulation_modification_method_pb2,
+    simulation_type_pb2,
     sitelink_placeholder_field_pb2,
     slot_pb2,
     spending_limit_type_pb2,
@@ -720,6 +795,7 @@ _shared_modules = [
     ad_parameter_error_pb2,
     ad_sharing_error_pb2,
     adx_error_pb2,
+    asset_error_pb2,
     authentication_error_pb2,
     authorization_error_pb2,
     bidding_error_pb2,
@@ -727,13 +803,16 @@ _shared_modules = [
     billing_setup_error_pb2,
     campaign_budget_error_pb2,
     campaign_criterion_error_pb2,
+    campaign_draft_error_pb2,
     campaign_error_pb2,
+    campaign_experiment_error_pb2,
     campaign_feed_error_pb2,
     campaign_shared_set_error_pb2,
     change_status_error_pb2,
     collection_size_error_pb2,
     context_error_pb2,
     conversion_action_error_pb2,
+    conversion_adjustment_upload_error_pb2,
     conversion_upload_error_pb2,
     country_code_error_pb2,
     criterion_error_pb2,
@@ -774,13 +853,16 @@ _shared_modules = [
     label_error_pb2,
     language_code_error_pb2,
     list_operation_error_pb2,
+    manager_link_error_pb2,
     media_bundle_error_pb2,
     media_file_error_pb2,
+    media_upload_error_pb2,
     multiplier_error_pb2,
     mutate_error_pb2,
     mutate_job_error_pb2,
     new_resource_creation_error_pb2,
     not_empty_error_pb2,
+    not_whitelisted_error_pb2,
     null_error_pb2,
     operation_access_denied_error_pb2,
     operator_error_pb2,
@@ -799,10 +881,12 @@ _shared_modules = [
     setting_error_pb2,
     shared_criterion_error_pb2,
     shared_set_error_pb2,
+    size_limit_error_pb2,
     string_format_error_pb2,
     string_length_error_pb2,
     url_field_error_pb2,
     user_list_error_pb2,
+    youtube_video_registration_error_pb2,
     account_budget_pb2,
     account_budget_proposal_pb2,
     ad_group_ad_label_pb2,
@@ -811,20 +895,26 @@ _shared_modules = [
     ad_group_bid_modifier_pb2,
     ad_group_criterion_label_pb2,
     ad_group_criterion_pb2,
+    ad_group_criterion_simulation_pb2,
     ad_group_extension_setting_pb2,
     ad_group_feed_pb2,
     ad_group_label_pb2,
     ad_group_pb2,
+    ad_group_simulation_pb2,
     ad_parameter_pb2,
     ad_pb2,
     ad_schedule_view_pb2,
     age_range_view_pb2,
+    asset_pb2,
     bidding_strategy_pb2,
     billing_setup_pb2,
     campaign_audience_view_pb2,
     campaign_bid_modifier_pb2,
     campaign_budget_pb2,
     campaign_criterion_pb2,
+    campaign_criterion_simulation_pb2,
+    campaign_draft_pb2,
+    campaign_experiment_pb2,
     campaign_extension_setting_pb2,
     campaign_feed_pb2,
     campaign_label_pb2,
@@ -847,6 +937,7 @@ _shared_modules = [
     display_keyword_view_pb2,
     domain_category_pb2,
     dynamic_search_ads_search_term_view_pb2,
+    expanded_landing_page_view_pb2,
     extension_feed_item_pb2,
     feed_item_pb2,
     feed_item_target_pb2,
@@ -867,6 +958,7 @@ _shared_modules = [
     keyword_plan_pb2,
     keyword_view_pb2,
     label_pb2,
+    landing_page_view_pb2,
     language_constant_pb2,
     location_view_pb2,
     managed_placement_view_pb2,
@@ -876,6 +968,7 @@ _shared_modules = [
     mobile_device_constant_pb2,
     mutate_job_pb2,
     operating_system_version_constant_pb2,
+    paid_organic_search_term_view_pb2,
     parental_status_view_pb2,
     payments_account_pb2,
     product_bidding_category_constant_pb2,
@@ -891,10 +984,8 @@ _shared_modules = [
     user_interest_pb2,
     user_list_pb2,
     video_pb2,
-    http_pb2,
     operations_pb2,
     any_pb2,
-    descriptor_pb2,
     empty_pb2,
     field_mask_pb2,
     wrappers_pb2,
@@ -910,19 +1001,25 @@ _local_modules = [
     ad_group_bid_modifier_service_pb2,
     ad_group_criterion_label_service_pb2,
     ad_group_criterion_service_pb2,
+    ad_group_criterion_simulation_service_pb2,
     ad_group_extension_setting_service_pb2,
     ad_group_feed_service_pb2,
     ad_group_label_service_pb2,
     ad_group_service_pb2,
+    ad_group_simulation_service_pb2,
     ad_parameter_service_pb2,
     ad_schedule_view_service_pb2,
     age_range_view_service_pb2,
+    asset_service_pb2,
     bidding_strategy_service_pb2,
     billing_setup_service_pb2,
     campaign_audience_view_service_pb2,
     campaign_bid_modifier_service_pb2,
     campaign_budget_service_pb2,
     campaign_criterion_service_pb2,
+    campaign_criterion_simulation_service_pb2,
+    campaign_draft_service_pb2,
+    campaign_experiment_service_pb2,
     campaign_extension_setting_service_pb2,
     campaign_feed_service_pb2,
     campaign_label_service_pb2,
@@ -932,6 +1029,7 @@ _local_modules = [
     change_status_service_pb2,
     click_view_service_pb2,
     conversion_action_service_pb2,
+    conversion_adjustment_upload_service_pb2,
     conversion_upload_service_pb2,
     custom_interest_service_pb2,
     customer_client_link_service_pb2,
@@ -946,6 +1044,7 @@ _local_modules = [
     display_keyword_view_service_pb2,
     domain_category_service_pb2,
     dynamic_search_ads_search_term_view_service_pb2,
+    expanded_landing_page_view_service_pb2,
     extension_feed_item_service_pb2,
     feed_item_service_pb2,
     feed_item_target_service_pb2,
@@ -968,6 +1067,7 @@ _local_modules = [
     keyword_plan_service_pb2,
     keyword_view_service_pb2,
     label_service_pb2,
+    landing_page_view_service_pb2,
     language_constant_service_pb2,
     location_view_service_pb2,
     managed_placement_view_service_pb2,
@@ -977,6 +1077,7 @@ _local_modules = [
     mobile_device_constant_service_pb2,
     mutate_job_service_pb2,
     operating_system_version_constant_service_pb2,
+    paid_organic_search_term_view_service_pb2,
     parental_status_view_service_pb2,
     payments_account_service_pb2,
     product_bidding_category_constant_service_pb2,

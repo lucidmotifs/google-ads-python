@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,26 +17,24 @@
 The bid modifiers will be based on hotel check-in day and length of stay.
 """
 
-from __future__ import absolute_import
 
 import argparse
-import six
 import sys
 
 import google.ads.google_ads.client
 
 
 def main(client, customer_id, ad_group_id):
-    ad_group_service = client.get_service('AdGroupService', version='v1')
+    ad_group_service = client.get_service('AdGroupService', version='v3')
     ag_bm_service = client.get_service('AdGroupBidModifierService',
-                                       version='v1')
+                                       version='v3')
 
     # Create ad group bid modifier based on hotel check-in day.
     check_in_ag_bm_operation = client.get_type('AdGroupBidModifierOperation',
-                                               version='v1')
+                                               version='v3')
     check_in_ag_bid_modifier = check_in_ag_bm_operation.create
     check_in_ag_bid_modifier.hotel_check_in_day.day_of_week = (
-        client.get_type('DayOfWeekEnum', version='v1').MONDAY)
+        client.get_type('DayOfWeekEnum', version='v3').MONDAY)
     check_in_ag_bid_modifier.ad_group.value = ad_group_service.ad_group_path(
         customer_id, ad_group_id)
     # Sets the bid modifier value to 150%.
@@ -43,7 +42,7 @@ def main(client, customer_id, ad_group_id):
 
     # Create ad group bid modifier based on hotel length of stay info.
     los_ag_bm_operation = client.get_type('AdGroupBidModifierOperation',
-                                          version='v1')
+                                          version='v3')
     los_ag_bid_modifier = los_ag_bm_operation.create
     los_ag_bid_modifier.ad_group.value = ad_group_service.ad_group_path(
         customer_id, ad_group_id)
@@ -85,9 +84,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description=('Adds an ad group bid modifier to a hotel ad group.'))
     # The following argument(s) should be provided to run the example.
-    parser.add_argument('-c', '--customer_id', type=six.text_type,
+    parser.add_argument('-c', '--customer_id', type=str,
                         required=True, help='The Google Ads customer ID.')
-    parser.add_argument('-a', '--ad_group_id', type=six.text_type,
+    parser.add_argument('-a', '--ad_group_id', type=str,
                         required=True,
                         help='The ad group ID of the hotel ad group.')
     args = parser.parse_args()

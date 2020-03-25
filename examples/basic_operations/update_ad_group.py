@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,10 +17,8 @@
 To get ad groups, run get_ad_groups.py.
 """
 
-from __future__ import absolute_import
 
 import argparse
-import six
 import sys
 
 import google.ads.google_ads.client
@@ -27,14 +26,14 @@ from google.api_core import protobuf_helpers
 
 
 def main(client, customer_id, ad_group_id, bid_micro_amount):
-    ad_group_service = client.get_service('AdGroupService', version='v1')
+    ad_group_service = client.get_service('AdGroupService', version='v3')
 
     # Create ad group operation.
-    ad_group_operation = client.get_type('AdGroupOperation', version='v1')
+    ad_group_operation = client.get_type('AdGroupOperation', version='v3')
     ad_group = ad_group_operation.update
     ad_group.resource_name = ad_group_service.ad_group_path(
         customer_id, ad_group_id)
-    ad_group.status = client.get_type('AdGroupStatusEnum', version='v1').PAUSED
+    ad_group.status = client.get_type('AdGroupStatusEnum', version='v3').PAUSED
     ad_group.cpc_bid_micros.value = bid_micro_amount
     fm = protobuf_helpers.field_mask(None, ad_group)
     ad_group_operation.update_mask.CopyFrom(fm)
@@ -66,9 +65,9 @@ if __name__ == '__main__':
         description=('Updates an ad group for specified customer and campaign '
                      'id with the given bid micro amount.'))
     # The following argument(s) should be provided to run the example.
-    parser.add_argument('-c', '--customer_id', type=six.text_type,
+    parser.add_argument('-c', '--customer_id', type=str,
                         required=True, help='The Google Ads customer ID.')
-    parser.add_argument('-a', '--ad_group_id', type=six.text_type,
+    parser.add_argument('-a', '--ad_group_id', type=str,
                         required=True, help='The ad group ID.')
     parser.add_argument('-b', '--bid_micro_amount', type=int,
                         required=True, help='The bid micro amount.')

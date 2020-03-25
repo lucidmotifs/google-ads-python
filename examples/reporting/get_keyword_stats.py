@@ -1,4 +1,5 @@
-# Copyright 2018 Google LLC
+#!/usr/bin/env python
+# Copyright 2020 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,20 +17,15 @@
 Retrieves negative keywords in a campaign.
 """
 
-from __future__ import absolute_import
-
 import argparse
-import six
 import sys
 
-import google.ads.google_ads.client
+from google.ads.google_ads.client import GoogleAdsClient
+from google.ads.google_ads.errors import GoogleAdsException
 
 
-_DEFAULT_PAGE_SIZE = 1000
-
-
-def main(client, customer_id, page_size):
-    ga_service = client.get_service('GoogleAdsService', version='v1')
+def main(client, customer_id):
+    ga_service = client.get_service('GoogleAdsService', version='v3')
 
     query = ('SELECT campaign.id, campaign.name, ad_group.id, ad_group.name, '
              'ad_group_criterion.criterion_id, '
@@ -43,47 +39,51 @@ def main(client, customer_id, page_size):
              'ORDER BY metrics.impressions DESC '
              'LIMIT 50')
 
-    response = ga_service.search(customer_id, query, page_size=page_size)
-
+    # Issues a search request using streaming.
+    response = ga_service.search_stream(customer_id, query)
+    keyword_match_type_enum = client.get_type(
+        'KeywordMatchTypeEnum', version='v2').KeywordMatchType
     try:
-        for row in response:
-            campaign = row.campaign
-            ad_group = row.ad_group
-            criterion = row.ad_group_criterion
-            metrics = row.metrics
-
-            print('Keyword text "%s" with match type "%d" and ID %d in ad '
-                  'group "%s" with ID "%d" in campaign "%s" with ID %d had %s '
-                  'impression(s), %s click(s), and %s cost (in micros) during '
-                  'the last 7 days.'
-                  % (criterion.keyword.text.value, criterion.keyword.match_type,
-                     criterion.criterion_id.value,
-                     ad_group.name.value, ad_group.id.value,
-                     campaign.name.value, campaign.id.value,
-                     metrics.impressions.value,
-                     metrics.clicks.value, metrics.cost_micros.value))
-    except google.ads.google_ads.errors.GoogleAdsException as ex:
-        print('Request with ID "%s" failed with status "%s" and includes the '
-              'following errors:' % (ex.request_id, ex.error.code().name))
+        for batch in response:
+            for row in batch.results:
+                campaign = row.campaign
+                ad_group = row.ad_group
+                criterion = row.ad_group_criterion
+                metrics = row.metrics
+                keyword_match_type = keyword_match_type_enum.Name(
+                    criterion.keyword.match_type)
+                print(f'Keyword text "{criterion.keyword.text.value}" with '
+                      f'match type "{keyword_match_type}" '
+                      f'and ID {criterion.criterion_id.value} in '
+                      f'ad group "{ad_group.name.value}" '
+                      f'with ID "{ad_group.id.value}" '
+                      f'in campaign "{campaign.name.value}" '
+                      f'with ID {campaign.id.value} '
+                      f'had {metrics.impressions.value} impression(s), '
+                      f'{metrics.clicks.value} click(s), and '
+                      f'{metrics.cost_micros.value} cost (in micros) during '
+                      'the last 7 days.')
+    except GoogleAdsException as ex:
+        print(f'Request with ID "{ex.request_id}" failed with status '
+              f'"{ex.error.code().name}" and includes the following errors:')
         for error in ex.failure.errors:
-            print('\tError with message "%s".' % error.message)
+            print(f'\tError with message "{error.message}".')
             if error.location:
                 for field_path_element in error.location.field_path_elements:
-                    print('\t\tOn field: %s' % field_path_element.field_name)
+                    print(f'\t\tOn field: {field_path_element.field_name}')
         sys.exit(1)
 
 
 if __name__ == '__main__':
     # GoogleAdsClient will read the google-ads.yaml configuration file in the
     # home directory if none is specified.
-    google_ads_client = (google.ads.google_ads.client.GoogleAdsClient
-                         .load_from_storage())
+    google_ads_client = GoogleAdsClient.load_from_storage()
 
     parser = argparse.ArgumentParser(
         description=('Retrieves a campaign\'s negative keywords.'))
     # The following argument(s) should be provided to run the example.
-    parser.add_argument('-c', '--customer_id', type=six.text_type,
+    parser.add_argument('-c', '--customer_id', type=str,
                         required=True, help='The Google Ads customer ID.')
     args = parser.parse_args()
 
-    main(google_ads_client, args.customer_id, _DEFAULT_PAGE_SIZE)
+    main(google_ads_client, args.customer_id)

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,10 +16,8 @@
 groups with the most impressions over the last 7 days.
 """
 
-from __future__ import absolute_import
 
 import argparse
-import six
 import sys
 
 import google.ads.google_ads.client
@@ -28,7 +27,7 @@ _DEFAULT_PAGE_SIZE = 50
 
 
 def main(client, customer_id, page_size):
-    ga_service = client.get_service('GoogleAdsService', version='v1')
+    ga_service = client.get_service('GoogleAdsService', version='v3')
 
     query = ('SELECT campaign.id, campaign.advertising_channel_type, '
              'ad_group.id, ad_group.status, metrics.impressions, '
@@ -48,8 +47,8 @@ def main(client, customer_id, page_size):
         for row in response:
             campaign = row.campaign
             ad_group = row.ad_group
-            hotel_check_in_day_of_week = row.hotel_check_in_day_of_week
-            hotel_length_of_stay = row.hotel_length_of_stay
+            hotel_check_in_day_of_week = row.segments.hotel_check_in_day_of_week
+            hotel_length_of_stay = row.segments.hotel_length_of_stay
             metrics = row.metrics
 
             print('Ad group ID "%s" in campaign ID "%s" ' % (ad_group.id.value,
@@ -80,7 +79,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description=('Retrieves Hotel-ads performance statistics.'))
     # The following argument(s) should be provided to run the example.
-    parser.add_argument('-c', '--customer_id', type=six.text_type,
+    parser.add_argument('-c', '--customer_id', type=str,
                         required=True, help='The Google Ads customer ID.')
     args = parser.parse_args()
 

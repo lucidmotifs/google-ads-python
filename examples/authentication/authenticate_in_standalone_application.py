@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +20,6 @@ application flow.
 It is intended to be run from the command line and requires user input.
 """
 
-from __future__ import absolute_import
 
 import argparse
 

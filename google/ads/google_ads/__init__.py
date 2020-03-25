@@ -13,11 +13,11 @@
 # limitations under the License.
 
 
-from __future__ import absolute_import
 
 
 import google.ads.google_ads.client
 import google.ads.google_ads.errors
+import google.ads.google_ads.util
 
 
-VERSION = '1.1.1'
+VERSION = '5.0.2'

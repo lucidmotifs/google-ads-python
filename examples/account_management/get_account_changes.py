@@ -16,12 +16,10 @@
 
 """This example gets the changes in the account made in the last 7 days."""
 
-from __future__ import absolute_import
 
 import argparse
 import sys
 
-import six
 
 import google.ads.google_ads.client
 
@@ -58,7 +56,7 @@ def resource_name_for_resource_type(resource_type, row):
 
 
 def main(client, customer_id):
-  ads_service = client.get_service('GoogleAdsService', version='v1')
+  ads_service = client.get_service('GoogleAdsService', version='v3')
   query = ('SELECT change_status.resource_name, '
            'change_status.last_change_date_time, '
            'change_status.resource_type, '
@@ -76,9 +74,9 @@ def main(client, customer_id):
                                 page_size=ADS_PAGE_SIZE)
 
   resource_type_enum = (client.get_type(
-      'ChangeStatusResourceTypeEnum', version='v1').ChangeStatusResourceType)
+      'ChangeStatusResourceTypeEnum', version='v3').ChangeStatusResourceType)
   change_status_operation_enum = (client.get_type(
-      'ChangeStatusOperationEnum', version='v1').ChangeStatusOperation)
+      'ChangeStatusOperationEnum', version='v3').ChangeStatusOperation)
 
   try:
     for row in response:
@@ -113,7 +111,7 @@ if __name__ == '__main__':
   parser = argparse.ArgumentParser(
      description=('Displays account changes that occurred in the last 7 days.'))
   # The following argument(s) should be provided to run the example.
-  parser.add_argument('-c', '--customer_id', type=six.text_type,
+  parser.add_argument('-c', '--customer_id', type=str,
                       required=True, help='The Google Ads customer ID.')
   args = parser.parse_args()
 

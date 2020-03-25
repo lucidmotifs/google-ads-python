@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,26 +14,24 @@
 # limitations under the License.
 """This adds an expanded text ad using advanced features of upgraded URLs."""
 
-from __future__ import absolute_import
 
 import argparse
-import six
 import sys
 
 import google.ads.google_ads.client
 
 
 def main(client, customer_id, ad_group_id):
-    ad_group_ad_service = client.get_service('AdGroupAdService', version='v1')
-    ad_group_service = client.get_service('AdGroupService', version='v1')
+    ad_group_ad_service = client.get_service('AdGroupAdService', version='v3')
+    ad_group_service = client.get_service('AdGroupService', version='v3')
 
     # Create ad group ad.
-    ad_group_ad_operation = client.get_type('AdGroupAdOperation', version='v1')
+    ad_group_ad_operation = client.get_type('AdGroupAdOperation', version='v3')
     ad_group_ad = ad_group_ad_operation.create
     ad_group_ad.ad_group.value = ad_group_service.ad_group_path(
         customer_id, ad_group_id)
     ad_group_ad.status = client.get_type('AdGroupAdStatusEnum',
-                                         version='v1').PAUSED
+                                         version='v3').PAUSED
 
     # Set expanded text ad info
     final_url = ad_group_ad.ad.final_urls.add()
@@ -101,9 +100,9 @@ if __name__ == '__main__':
         description=('Adds an expanded text ad to the specified ad group ID, '
                      'for the given customer ID.'))
     # The following argument(s) should be provided to run the example.
-    parser.add_argument('-c', '--customer_id', type=six.text_type,
+    parser.add_argument('-c', '--customer_id', type=str,
                         required=True, help='The Google Ads customer ID.')
-    parser.add_argument('-a', '--ad_group_id', type=six.text_type,
+    parser.add_argument('-a', '--ad_group_id', type=str,
                         required=True, help='The ad group ID.')
     args = parser.parse_args()
 
